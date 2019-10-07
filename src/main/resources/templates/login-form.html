@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+
+<head th:insert="fragments/static-resources :: style-bootstrap">
+	<meta charset="utf-8">
+	
+</head>
+
+<body>
+	<!-- Navbar-->
+	<div th:insert="fragments/navbar :: navbar"></div>
+
+	<!--Form-->
+	<div class="container py-4">
+		<div class="d-flex justify-content-center h-100">
+			<div class="card">
+				<div class="card-header">
+					<h3>Login</h3>
+					<!--Google icon -->
+					<div class="d-flex justify-content-end social_icon">
+						<span><i class="fab fa-facebook-square"></i></span>
+						<span><i class="fab fa-google-plus-square"></i></span>
+					</div>
+				</div>
+				<div class="card-body">
+					<form th:action="@{/login}" method="post">
+						<!--Email field-->
+						<span class="error-message" th:if="${param.error}">Email and password do not match</span>
+						<div class="input-group form-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><i class="fas fa-user"></i></span>
+							</div>
+							<input type="email" id="username" name="username" class="form-control" placeholder="email">
+
+						</div>
+						<!--Password field-->
+						<div class="input-group form-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><i class="fas fa-key"></i></span>
+							</div>
+							<input type="password" name="password" id="password" class="form-control"
+								placeholder="password">
+						</div>
+						<!--Submit button-->
+						<div class="form-group">
+							<input type="submit" value="Login" class="btn float-right login_btn">
+						</div>
+					</form>
+				</div>
+				<!--Registration Link-->
+				<div class="card-footer">
+					<div class="d-flex justify-content-center links">
+						Don't have an account?<a class="yellow-link" href="/registration">Sign Up</a>
+					</div>
+					<div class="d-flex justify-content-center">
+						<a class="yellow-link" href="#">Forgot your password?</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--Footer-->
+	<div th:insert="fragments/footer :: footer"></div>
+</body>
+<div th:insert="fragments/static-resources :: javascript"></div>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:insert="fragments/static-resources :: style-bootstrap">
+    <meta charset="utf-8">
+    
+</head>
+
+<body>
+    <div th:insert="fragments/navbar :: navbar"></div>
+
+    <div class="container shows-list">
+        <div class="row col-md-6 col-md-offset-2 custyle">
+        <table class="table table-striped custab">
+        <thead class="user-shows-table-header">
+            <tr>
+                <th>Title</th>
+                <th>Year</th>
+            </tr>
+        </thead>
+        <th:block th:each="show : ${shows}">
+                <tr class="user-shows-table-row">
+                    <td th:text="${show.title}"></td>
+                    <td th:text="${show.year}"></td>
+                    <td class="text-center">
+                            <form th:action="@{/user/unfollowShow}" th:object="${showToTrack}" method="post">
+                                <input type="hidden" name="traktId" th:value="${show.traktId}">
+                                <input type="submit" value="Remove" class="btn btn-danger btn-xs glyphicon glyphicon-remove">
+                            </form></td>
+                </tr>
+            </th:block>
+        </table>
+        </div>
+    </div>
+
+    <div th:insert="fragments/footer :: footer"></div>
+</body>
+<div th:insert="fragments/static-resources :: javascript"></div>
+</html>

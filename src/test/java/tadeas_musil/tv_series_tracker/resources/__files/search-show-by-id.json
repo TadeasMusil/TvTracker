@@ -1,0 +1,18 @@
+[
+    {
+      "type": "show",
+      "score": 1000,
+      "show": {
+        "title": "Bugs",
+        "year": 1995,
+        "ids": {
+          "trakt": 7,
+          "slug": "bugs",
+          "tvdb": 77698,
+          "imdb": "tt0111904",
+          "tmdb": 7,
+          "tvrage": null
+        }
+      }
+    }
+  ]

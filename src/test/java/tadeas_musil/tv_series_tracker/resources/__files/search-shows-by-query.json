@@ -1,0 +1,162 @@
+[
+  {
+    "type": "show",
+    "score": 345.0662,
+    "show": {
+      "title": "Planet Earth",
+      "year": 2006,
+      "ids": {
+        "trakt": 1039,
+        "slug": "planet-earth",
+        "tvdb": 79257,
+        "imdb": "tt0795176",
+        "tmdb": 1044,
+        "tvrage": 8077
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 245.53741,
+    "show": {
+      "title": "Planet Earth II",
+      "year": 2016,
+      "ids": {
+        "trakt": 112332,
+        "slug": "planet-earth-ii",
+        "tvdb": 318408,
+        "imdb": "tt5491994",
+        "tmdb": 68595,
+        "tvrage": null
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 228.17334,
+    "show": {
+      "title": "Earth 2",
+      "year": 1994,
+      "ids": {
+        "trakt": 1464,
+        "slug": "earth-2",
+        "tvdb": 75799,
+        "imdb": "tt0108758",
+        "tmdb": 1473,
+        "tvrage": 3415
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 203.17026,
+    "show": {
+      "title": "Captain Earth",
+      "year": 2014,
+      "ids": {
+        "trakt": 60364,
+        "slug": "captain-earth",
+        "tvdb": 276893,
+        "imdb": "tt3451870",
+        "tmdb": 60806,
+        "tvrage": 41806
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 203.0957,
+    "show": {
+      "title": "The Last Man on Earth",
+      "year": 2015,
+      "ids": {
+        "trakt": 77779,
+        "slug": "the-last-man-on-earth",
+        "tvdb": 281622,
+        "imdb": "tt3230454",
+        "tmdb": 61888,
+        "tvrage": 38162
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 203.03203,
+    "show": {
+      "title": "People of Earth",
+      "year": 2016,
+      "ids": {
+        "trakt": 110226,
+        "slug": "people-of-earth",
+        "tvdb": 315068,
+        "imdb": "tt4695530",
+        "tmdb": 67831,
+        "tvrage": null
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 186.61736,
+    "show": {
+      "title": "Earth: Final Conflict",
+      "year": 1997,
+      "ids": {
+        "trakt": 2821,
+        "slug": "earth-final-conflict",
+        "tvdb": 71784,
+        "imdb": "tt0123816",
+        "tmdb": 2840,
+        "tvrage": 3416
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 185.25142,
+    "show": {
+      "title": "Supersized Earth",
+      "year": 2012,
+      "ids": {
+        "trakt": 68425,
+        "slug": "supersized-earth",
+        "tvdb": 264268,
+        "imdb": "tt2527282",
+        "tmdb": null,
+        "tvrage": null
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 183.65471,
+    "show": {
+      "title": "Fierce Earth",
+      "year": 2013,
+      "ids": {
+        "trakt": 73548,
+        "slug": "fierce-earth",
+        "tvdb": 266927,
+        "imdb": null,
+        "tmdb": null,
+        "tvrage": null
+      }
+    }
+  },
+  {
+    "type": "show",
+    "score": 183.17273,
+    "show": {
+      "title": "Planet Earth",
+      "year": 1986,
+      "ids": {
+        "trakt": 33659,
+        "slug": "planet-earth-1986",
+        "tvdb": 83779,
+        "imdb": null,
+        "tmdb": 33805,
+        "tvrage": null
+      }
+    }
+  }
+]

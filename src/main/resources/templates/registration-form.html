@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:insert="fragments/static-resources :: style-bootstrap">
+    <meta charset="utf-8">
+    
+</head>
+
+<body>
+    <!--Navbar-->
+    <div th:insert="fragments/navbar :: navbar"></div>
+    <!--Form-->
+    <div class="container py-4">
+        <div class="d-flex justify-content-center h-100">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Registration</h3>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/processRegistration}" th:object="${user}" method="post">
+                        <!-- Email field-->
+                        <span class="error-message" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">asd</span>
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input type="email" th:field="*{username}" class="form-control" placeholder="email">
+
+                    </div>
+                    <!-- Password field-->
+                    <span class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input type="password" th:field="*{password}" class="form-control" placeholder="password">
+                    </div>
+                    <!-- Confirm password field-->
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input type="password" th:field="*{confirmPassword}" class="form-control"
+                               placeholder="confirm password">
+                    </div>
+                    <span class="error-message" th:if="${#fields.hasErrors('confirmPassword')}"
+                          th:errors="*{confirmPassword}"></span>
+                          <!-- Submit button-->
+                    <div class="form-group">
+                        <input type="submit" value="Register" class="btn float-right login_btn">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Footer-->
+<div th:insert="fragments/footer :: footer"></div>
+</body>
+<div th:insert="fragments/static-resources :: javascript"></div>
+</html>

@@ -1,0 +1,211 @@
+.image-list{
+    max-width: 50%;
+    max-height: 50%;
+}
+
+.light-text{
+    color: #CADBC0;
+}
+.footer-link {
+    font-size: 15px;
+    color: #EB5160;
+}
+.navbar-link {
+    font-size: 20px;
+    color: #EB5160;
+    font-weight: 700!important;
+}
+.navbar-link:hover {
+    color: #EB5160; 
+    }
+.logo-sign {
+  font-size: 40px;
+  color: #EB5160; 
+  }
+  .logo-sign:hover {
+    color: #EB5160; 
+    }
+  
+body {
+  background:#071013;
+  overflow-x:hidden;
+  
+	
+}
+html{
+    min-height: 100%;
+    position: relative;
+}
+ 
+ .container{
+height: 100%;
+align-content: center;
+}
+
+.card{
+height: 400px;
+margin-top: auto;
+margin-bottom: auto;
+width: 400px;
+background-color: rgba(0,0,0,0.5) !important;
+}
+
+.social_icon span{
+font-size: 60px;
+margin-left: 10px;
+color: #FFC312;
+}
+
+.social_icon span:hover{
+color: white;
+cursor: pointer;
+}
+
+.card-header h3{
+color: white;
+}
+
+.social_icon{
+position: absolute;
+right: 20px;
+top: -45px;
+}
+
+.input-group-prepend span{
+width: 50px;
+background-color: #FFC312;
+color: black;
+border:0 !important;
+}
+
+input:focus{
+outline: 0 0 0 0  !important;
+box-shadow: 0 0 0 0 !important;
+
+}
+
+.login_btn{
+color: black;
+background-color: #FFC312;
+width: 100px;
+}
+
+.login_btn:hover{
+color: black;
+background-color: white;
+}
+
+.links{
+color: white;
+}
+
+.links a{
+margin-left: 4px;
+}
+.yellow-link{
+	color:#ffc312;
+}
+.error-message{
+    color: red;
+}
+.no-outline{
+    outline: none !important;
+    -webkit-box-shadow: none !important;
+}
+
+
+
+
+.card-product .img-wrap {
+    border-radius: 3px 3px 0 0;
+    overflow: hidden;
+    position: relative;
+    height: 300px;
+    text-align: center;
+}
+.card-product .img-wrap img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: cover;
+}
+.card-product .info-wrap {
+    overflow: hidden;
+    padding: 15px;
+}
+.card-product .bottom-wrap {
+    padding: 15px;
+    border-top: 1px solid #eee;
+}
+
+.show-div{
+    margin-bottom: 3%;
+    text-align: -webkit-center;
+}
+  .previous {
+    
+    color: white;
+    margin-left: 5%; 
+    margin-bottom: 2%;
+    width:100px;
+    border: none;
+    background-color: #C94277;
+    border-color: #C94277;
+  }
+  
+  .next {
+    color: white;
+    float: right;
+    margin-right: 5%; 
+    margin-bottom: 2%;
+    width:100px;
+    border: none;
+    background-color: #C94277;
+    border-color: #C94277;
+  }
+
+  .show-card{
+      width: 80%;
+  }
+  .footer{
+    bottom: 0;
+    position: absolute;
+    margin-left: 10px;
+    display: flex;
+    color: #EB5160;
+  }
+  .custab{
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin: 5% 0;
+    box-shadow: 3px 3px 2px #ccc;
+    transition: 0.5s;
+    background-color:white;
+    }
+.custab:hover{
+    box-shadow: 3px 3px 0px transparent;
+    transition: 0.5s;
+    }
+    .shows-list{
+        text-align: -webkit-center;
+    }
+    .user-shows-table-header{
+        font-size: larger;
+    }
+    .user-shows-table-row{
+        font-size: 18px;
+        font-weight: bold;
+        font-family: none;
+    }
+    .trakt-logo{
+        width: 28px;
+        margin-left: 5px;
+    }
+    .tvmaze-logo{
+        width: 50px;
+        margin-left: 5px;
+    }
+    .hamburger-icon{
+        font-size: xx-large;
+        color:#EB5160;
+    }
+  

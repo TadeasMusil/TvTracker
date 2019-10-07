@@ -1,0 +1,54 @@
+{
+    "id": 19309,
+    "url": "http://www.tvmaze.com/shows/19309/puck",
+    "name": "Puck!",
+    "type": "Scripted",
+    "language": "Korean",
+    "genres": [
+        "Drama",
+        "Sports"
+    ],
+    "status": "Ended",
+    "runtime": 70,
+    "premiered": "2016-01-01",
+    "officialSite": "http://program.sbs.co.kr/builder/programMainList.do?pgm_id=22000008939",
+    "schedule": {
+        "time": "20:30",
+        "days": [
+            "Friday"
+        ]
+    },
+    "rating": {
+        "average": null
+    },
+    "weight": 0,
+    "network": {
+        "id": 127,
+        "name": "SBS",
+        "country": {
+            "name": "Korea, Republic of",
+            "code": "KR",
+            "timezone": "Asia/Seoul"
+        }
+    },
+    "webChannel": null,
+    "externals": {
+        "tvrage": null,
+        "thetvdb": 305250,
+        "imdb": "tt5545832"
+    },
+    "image": {
+        "medium": "http://static.tvmaze.com/uploads/images/medium_portrait/67/169692.jpg",
+        "original": "http://static.tvmaze.com/uploads/images/original_untouched/67/169692.jpg"
+    },
+    "summary": "<p><b>Puck! </b>is about a man who improves the quality of his life through ice hockey.</p><p>Due to his ex-wife's debt, Joon Man had no choice but to work for a gang boss. Even though he has a warm personality, he works as a loan shark. To get debt from an ice hockey coach, Joon Man joins the ice hockey team. He begins to change after joining the university ice hockey.</p>",
+    "updated": 1477877007,
+    "_links": {
+        "self": {
+            "href": "http://api.tvmaze.com/shows/19309"
+        },
+        "previousepisode": {
+            "href": "http://api.tvmaze.com/episodes/869733"
+        }
+    }
+}

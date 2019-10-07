@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:insert="fragments/static-resources :: style-bootstrap">
+    <meta charset="utf-8">
+    
+</head>
+
+<body>
+    <!-- Navbar-->
+    <div th:insert="fragments/navbar :: navbar"></div>
+    <!--List of shows-->
+
+
+    <th:block th:each="show,i : ${shows}">
+        <th:block th:if="${i.index % 3 == 0}">
+            <div class="row">
+        </th:block>
+        <div class="show-div col-sm-4">
+            <figure class="card card-product show-card">
+                <!--Picture-->
+                <div class="img-wrap"><img th:if="${show.imageUrl == ''}" src="/images/image-not-available.png">
+                    <img th:unless="${show.imageUrl == ''}" th:src="@{${show.imageUrl}}">
+                </div>
+                <!--Show info-->
+                <figcaption class="info-wrap">
+                    <h4 th:text="${show.title + ' (' + show.year + ')'}" class="title light-text"></h4>
+                    <!--Follow button-->
+                    <form th:action="@{/user/followShow}" th:object="${showToTrack}" method="post">
+
+                        <a th:unless="${show.imdbId == null}"
+                            th:href="@{'https://www.imdb.com/title/' + ${show.imdbId}}" class="float-left">Imdb page</a>
+
+
+                        <input type="hidden" name="traktId" th:value="${show.traktId}">
+                        <input type="submit" value="Follow" class="btn btn-sm btn-primary float-right">
+
+                    </form>
+                </figcaption>
+            </figure>
+        </div>
+        <th:block th:if="${((i.index + 1) % 3 == 0) || i.last == true}">
+            </div>
+        </th:block>
+    </th:block>
+
+
+
+    <!-- Next and Previous page links-->
+    <div style="height: 50px">
+        <a th:unless="${currentPage == 1}" th:href="${previousPage}"
+            class="btn btn-sm btn-primary previous no-outline">&#8249; Previous</a>
+        <a th:unless="${currentPage == totalNumberOfPages}" th:href="${nextPage}"
+            class="btn btn-sm btn-primary next no-outline">Next &#8250;</a>
+    </div>
+    <!--Footer-->
+    <div th:insert="fragments/footer :: footer"></div>
+</body>
+<div th:insert="fragments/static-resources :: javascript"></div>
+</html>
