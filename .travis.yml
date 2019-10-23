@@ -1,3 +1,5 @@
 language: java
 sudo: true
 jdk: oraclejdk11
+before_install:
+  - chmod +x mvnw
