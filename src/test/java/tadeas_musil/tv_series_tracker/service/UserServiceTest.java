@@ -1,17 +1,13 @@
 package tadeas_musil.tv_series_tracker.service;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-
-
-
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,61 +39,56 @@ public class UserServiceTest {
     @MockBean
     private BCryptPasswordEncoder passwordEncoder;
 
-    private User joe; 
-
     @Before
     public void setUp(){
-        joe = new User();
-        joe.setUsername("joe@email.com");
-        joe.setPassword("password");
-        userRepository.save(joe);
         when(passwordEncoder.encode(anyString())).then(returnsFirstArg());
+    }
+    private User getTestUser(){
+        User user = new User();
+        user.setUsername("test@email.com");
+        user.setPassword("password");
+        return user;
     }
     @Test
     public void saveUser_shouldSaveUser() {
-        userService.saveUser(joe);
+        User user = getTestUser();
+
+        userService.saveUser(user);
+        User savedUser = userRepository.findByUsername(user.getUsername());
         
-        User savedUser = userRepository.findByUsername(joe.getUsername());
-        
-        assertThat(savedUser).hasFieldOrPropertyWithValue("username", joe.getUsername())
-                             .hasFieldOrPropertyWithValue("password", joe.getPassword())
-                             .hasFieldOrPropertyWithValue("dailyScheduleNotification", true)
-                             .hasFieldOrPropertyWithValue("newShowNotification", true);
+        assertThat(savedUser).hasFieldOrPropertyWithValue("username", user.getUsername())
+                             .hasFieldOrPropertyWithValue("password", user.getPassword())
+                             .hasFieldOrPropertyWithValue("isGettingScheduleNotification", true)
+                             .hasFieldOrPropertyWithValue("isGettingRecommendedShowsNotification", true);
 
     }
 
     @Test
     public void updateUser_shouldUpdateUser() {
-        joe.setPassword("newPassword");
-        joe.setConfirmPassword("newPassword");
-        joe.setDailyScheduleNotification(true);
+        User user = getTestUser();
+        userRepository.save(user);
+        user.setPassword("newPassword");
+        user.setGettingScheduleNotification(false);
         
-        userService.updateUser(joe);
-        User updatedUser = userRepository.findByUsername(joe.getUsername());
+        userService.updateUser(user);
+        User updatedUser = userRepository.findByUsername(user.getUsername());
         
-        assertThat(updatedUser).hasFieldOrPropertyWithValue("password", joe.getPassword())
-                                .hasFieldOrPropertyWithValue("dailyScheduleNotification", joe.isDailyScheduleNotification());
+        assertThat(updatedUser).hasFieldOrPropertyWithValue("password", "newPassword")
+                               .hasFieldOrPropertyWithValue("isGettingScheduleNotification", false);
 
     }
 
     @Test
-    public void getByUsername_shouldReturnCorrectUser() {
-        User searchResult = userService.getByUsername(joe.getUsername());
-        
-        assertThat(searchResult).hasFieldOrPropertyWithValue("username", joe.getUsername())
-                                .hasFieldOrPropertyWithValue("password", joe.getPassword());
-
-    }
-
-    @Test
-    public void followShow_shouldFollowShow() {
+    public void followShow_shouldAddShow() {
         Show showToAdd = new Show();
-        showToAdd.setTraktId("traktId");
-        showToAdd.setYear(1990);
-        showToAdd = showRepository.save(showToAdd);
+        showToAdd.setTraktId("showId");
+        showRepository.save(showToAdd);
         
-        userService.followShow(joe.getUsername(), showToAdd.getTraktId());
-        User user = userRepository.findByUsernameFetchShows(joe.getUsername());
+        User user = getTestUser();
+        userRepository.save(user);
+        
+        userService.followShow(user.getUsername(), showToAdd.getTraktId());
+        user = userRepository.findByUsernameFetchShows(user.getUsername());
         
         assertThat(user.getFollowedShows()).hasSize(1); 
 
@@ -107,12 +98,13 @@ public class UserServiceTest {
     public void unfollowShow_shouldUnfollowShow() {
         Show show = new Show();
         show.setTraktId("traktId");
-        show.setYear(1990);
-        joe.getFollowedShows().add(show);
-        userRepository.save(joe);
+        User user = getTestUser();
+        user.getFollowedShows().add(show);
+        userRepository.save(user);
         
-        userService.unfollowShow(joe.getUsername(), show.getTraktId());
-        User user = userRepository.findByUsernameFetchShows(joe.getUsername());
+        
+        userService.unfollowShow(user.getUsername(), show.getTraktId());
+        user = userRepository.findByUsernameFetchShows(user.getUsername());
         
         assertThat(user.getFollowedShows()).isEmpty(); 
     }

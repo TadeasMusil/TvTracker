@@ -50,13 +50,13 @@
   <div class="col-sm">
   <div class="checkbox">
     <label for="checkboxes-0">
-      <input type="checkbox" name="checkboxes" id="checkboxes-0" value="1" th:field="*{newShowNotification}" th:checked="*{newShowNotification}">
+      <input type="checkbox" name="checkboxes" id="checkboxes-0" value="1" th:field="${user.gettingRecommendedShowsNotification}" th:checked="${user.gettingRecommendedShowsNotification}">
       Get email notifications whenever a new well rated series comes out
     </label>
     </div>
   <div class="checkbox">
     <label for="checkboxes-1">
-      <input type="checkbox" name="checkboxes" id="checkboxes-1" value="2" th:field="*{dailyScheduleNotification}" th:checked="*{dailyScheduleNotification}">
+      <input type="checkbox" name="checkboxes" id="checkboxes-1" value="2" th:field="${user.gettingScheduleNotification}" th:checked="${user.gettingScheduleNotification}">
       Get weekly notifications with upcoming schedule of your series
     </label>
 	</div>

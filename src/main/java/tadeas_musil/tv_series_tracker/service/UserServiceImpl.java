@@ -1,7 +1,5 @@
 package tadeas_musil.tv_series_tracker.service;
 
-import java.util.Set;
-
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +35,11 @@ public class UserServiceImpl implements UserService {
 
 	public void updateUser(User updatedInfo) {
 		User user = getByUsername(updatedInfo.getUsername());
-		if (StringUtils.isNotBlank(updatedInfo.getConfirmPassword())) {
+		if (StringUtils.isNotBlank(updatedInfo.getPassword())) {
 			user.setPassword(passwordEncoder.encode(updatedInfo.getPassword()));
 		}
-		user.setDailyScheduleNotification(updatedInfo.isDailyScheduleNotification());
-		user.setNewShowNotification(updatedInfo.isNewShowNotification());
+		user.setGettingScheduleNotification(updatedInfo.isGettingScheduleNotification());
+		user.setGettingRecommendedShowsNotification(updatedInfo.isGettingRecommendedShowsNotification());
 		userRepository.save(user);
 	}
 
@@ -53,10 +51,7 @@ public class UserServiceImpl implements UserService {
 	public User getByUsernameWithShows(String username) {
 		return userRepository.findByUsernameFetchShows(username);
 	}
-
-	public Set<Show> getShows(String username) {
-		return userRepository.findByUsernameFetchShows(username).getFollowedShows();
-	}
+	
 	public void followShow(String username, String traktId) {
 		Show show = showRepository.findById(traktId)
 					.orElseGet(() -> showService.findShow(traktId));

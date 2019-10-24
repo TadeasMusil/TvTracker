@@ -3,7 +3,18 @@ package tadeas_musil.tv_series_tracker.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -12,11 +23,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tadeas_musil.tv_series_tracker.validation.PasswordMatch;
-import tadeas_musil.tv_series_tracker.validation.UniqueUsername;
 import tadeas_musil.tv_series_tracker.model.User.Registration;
 import tadeas_musil.tv_series_tracker.model.User.Settings;
 import tadeas_musil.tv_series_tracker.validation.EmptyOrAtLeast8Characters;
+import tadeas_musil.tv_series_tracker.validation.PasswordMatch;
+import tadeas_musil.tv_series_tracker.validation.UniqueUsername;
 
 @Getter
 @Setter
@@ -50,15 +61,17 @@ public class User {
     @Transient
     private String confirmPassword;
 
-    @Column(name = "daily_notification")
-    private boolean dailyScheduleNotification = true;
+    @Column(name = "schedule_notification")
+    private boolean isGettingScheduleNotification = true;
 
-    @Column(name = "new_show_notification")
-    private boolean newShowNotification = true;
-
+    @Column(name = "recommended_shows_notification")
+    private boolean isGettingRecommendedShowsNotification = true;
+                    
     @ManyToMany(fetch = FetchType.LAZY ,cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "app_user_show",
                 joinColumns = @JoinColumn(name = "app_user_id"),
                 inverseJoinColumns = @JoinColumn(name = "show_trakt_id"))
     private Set<Show> followedShows = new HashSet<>();
+
+    
 }

@@ -17,6 +17,8 @@ import tadeas_musil.tv_series_tracker.model.ImageWrapper;
 import tadeas_musil.tv_series_tracker.model.SearchResult;
 import tadeas_musil.tv_series_tracker.model.Show;
 import tadeas_musil.tv_series_tracker.model.ShowWrapper;
+import tadeas_musil.tv_series_tracker.repository.ShowRepository;
+import tadeas_musil.tv_series_tracker.util.DateUtils;
 
 @Service
 public class ShowService {
@@ -33,10 +35,10 @@ public class ShowService {
     @Autowired
     private WebClient webClient;
     
-    @Value("${app.timezone}")
-    private String timezone;
+    @Autowired
+    private ShowRepository showRepository;
 
-    public SearchResult searchShows(String query, Integer page) throws Exception {
+    public SearchResult searchShows(String query, Integer page) {
         SearchResult searchResult = new SearchResult();
         List<Show> shows = webClient
                 .get()
@@ -77,7 +79,7 @@ public class ShowService {
     }
 
     public List<Episode> getAiringEpisodes(){
-        String date = java.time.LocalDate.now(ZoneId.of(timezone)).toString();
+        String date = DateUtils.getCurrentDate().toString();
             
         List<Episode> episodes = webClient
         .get()
@@ -93,7 +95,26 @@ public class ShowService {
         return episodes;
     }
 
-    public String getImageUrl(String tvdbId) throws Exception {
+    public List<Show> getPremieringShows(){
+        String date = DateUtils.getCurrentDate().toString();
+            
+        List<Show> shows = webClient
+        .get()
+        .uri(env.getProperty("trakt_tv.api.uri.search_premiering_shows"),date)
+        .header("trakt-api-version", "${trakt_tv.api.version}")
+        .header("trakt-api-key", traktApiKey)
+        .accept(MediaType.APPLICATION_JSON)
+        .retrieve()
+        .bodyToFlux(Episode.class)
+        .map(episode -> episode.getShow())
+        .filter(show -> show.getImdbId() != null)
+        .collectList()
+        .block();
+
+        return shows;
+    }
+
+    public String getImageUrl(String tvdbId) {
         ImageWrapper wrapper = webClient
                 .get()
                 .uri(env.getProperty("tvmaze.api.uri.search_show_by_tvdbid"), tvdbId)
@@ -108,13 +129,19 @@ public class ShowService {
         return "";
     }
 
-    public void addImages(List<Show> shows) throws Exception {
+    public void addImages(List<Show> shows) {
         for (Show show : shows) {
             String tvdbId = show.getTvdbId();
             if (tvdbId != null) {
                 String url = getImageUrl(tvdbId);
                 show.setImageUrl(url);
             }
+        }
+    }
+
+    public void saveNewShow(Show show) {
+        if(!showRepository.existsById(show.getTraktId())){
+            showRepository.save(show);
         }
     }
 
