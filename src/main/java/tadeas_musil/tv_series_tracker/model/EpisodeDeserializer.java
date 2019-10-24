@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import org.springframework.core.env.Environment;
 
-import tadeas_musil.tv_series_tracker.util.AppContextUtil;
+import tadeas_musil.tv_series_tracker.util.AppContextUtils;
 
 public class EpisodeDeserializer extends StdDeserializer<Episode> {
 
@@ -34,7 +34,7 @@ public class EpisodeDeserializer extends StdDeserializer<Episode> {
     protected EpisodeDeserializer() {
         this(Episode.class);
         mapper = new ObjectMapper();
-        env = AppContextUtil.getCtx().getBean(Environment.class);
+        env = AppContextUtils.getCtx().getBean(Environment.class);
     }
 
     @Override
