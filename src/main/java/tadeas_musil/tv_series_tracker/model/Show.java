@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -42,6 +43,7 @@ public class Show {
     private int year;
 
     @Getter(value = AccessLevel.NONE)
+    @Column(name = "rating_check")
     private boolean shouldGetRatingChecked = false;
 
     private boolean isRecommended = false;
