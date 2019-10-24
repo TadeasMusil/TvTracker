@@ -59,7 +59,7 @@ public class UserServiceTest {
         assertThat(savedUser).hasFieldOrPropertyWithValue("username", user.getUsername())
                              .hasFieldOrPropertyWithValue("password", user.getPassword())
                              .hasFieldOrPropertyWithValue("isGettingScheduleNotification", true)
-                             .hasFieldOrPropertyWithValue("isGettingNewShowsNotification", true);
+                             .hasFieldOrPropertyWithValue("isGettingRecommendedShowsNotification", true);
 
     }
 
