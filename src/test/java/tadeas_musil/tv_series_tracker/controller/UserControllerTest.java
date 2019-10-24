@@ -1,9 +1,19 @@
 package tadeas_musil.tv_series_tracker.controller;
 
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,18 +22,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
+import tadeas_musil.tv_series_tracker.model.Show;
 import tadeas_musil.tv_series_tracker.model.User;
 import tadeas_musil.tv_series_tracker.service.UserService;
 
@@ -38,49 +37,57 @@ public class UserControllerTest {
     @MockBean
     private UserService userService;
     
-    private User joe;
+
     
     @Before
     public void setUp(){
-        joe = new User();
-        joe.setUsername("joe@email.com");
-        joe.setPassword("password");
-        joe.setDailyScheduleNotification(false);
-        joe.setNewShowNotification(false);
-        when(userService.getByUsername(any())).thenReturn(joe);
+        
+    
+    }
+
+    private User getTestUser(){
+        User user = new User();
+        user.setUsername("test@email.com");
+        user.setPassword("password");
+        user.setGettingRecommendedShowsNotification(false);
+        user.setGettingScheduleNotification(false);
+        user.getFollowedShows().add(new Show());
+        return user;
     }
     @Test
-    public void showUserSettingsShouldGetRedirectedWithoutAuthentication() throws Exception{
+    public void userSettings_ShouldGetRedirected_WithoutAuthentication() throws Exception{
         mockMvc.perform(get("/user/settings"))
         .andExpect(status().is3xxRedirection());
     }
 
     @Test
     @WithMockUser
-    public void shouldReturnSettingsPage() throws Exception{
+    public void userSettings_shouldReturnSettingsWithUserInfo_WhenAuthenticated() throws Exception{
+        User user = getTestUser();
+        when(userService.getByUsername(any())).thenReturn(user);
+        
         mockMvc.perform(get("/user/settings"))
         .andExpect(status().isOk())
         .andExpect(model().attributeExists("user"))
-        .andExpect(model().attribute("user",hasProperty("username", is("joe@email.com"))))
+        .andExpect(model().attribute("user",hasProperty("username", is("test@email.com"))))
         .andExpect(model().attribute("user",hasProperty("password", is("password"))))
-        .andExpect(model().attribute("user",hasProperty("dailyScheduleNotification", is(false))))
-        .andExpect(model().attribute("user",hasProperty("newShowNotification", is(false))))
-        .andExpect(view().name("settings"))
-        ;
+        .andExpect(model().attribute("user",hasProperty("gettingScheduleNotification", is(false))))
+        .andExpect(model().attribute("user",hasProperty("gettingRecommendedShowsNotification", is(false))))
+        .andExpect(view().name("settings"));
     }
 
     @Test
-    public void shouldReturnStatusForbidden() throws Exception{
+    public void updateUser_shouldReturnStatusForbidden_withoutAuthentication() throws Exception{
         mockMvc.perform(post("/user/updateUser"))
         .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser
-    public void givenTooShortPassword_shouldHaveError() throws Exception{
+    public void updateUser_shouldHaveError_givenTooShortPassword() throws Exception{
         mockMvc.perform(post("/user/updateUser")
         .param("password", "pass")
-        .param("password", "pass")
+        .param("confirmPassword", "pass")
         .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(model().attributeHasErrors("user"))
@@ -90,7 +97,10 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser
-    public void givenNoPassword_shouldBeWithoutErrors() throws Exception{
+    public void updateUser_shouldBeWithoutErrors_givenNoPassword() throws Exception{
+        User user = getTestUser();
+        when(userService.getByUsername(any())).thenReturn(user);
+        
         mockMvc.perform(post("/user/updateUser")
         .with(csrf()))
         .andExpect(status().isOk())
@@ -114,12 +124,15 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser
-    public void shouldReturnUserShows() throws Exception{
-        when(userService.getByUsernameWithShows(any())).thenReturn(joe);
+    public void userShows_shouldReturnUsersShows() throws Exception{
+        User user = getTestUser();
+        when(userService.getByUsernameWithShows(any())).thenReturn(user);
+        
         mockMvc.perform(post("/user/shows")
         .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(model().attributeExists("shows"))
+        .andExpect(model().attribute("shows", user.getFollowedShows()))
     	.andExpect(view().name("user-shows"));
     }
 }
