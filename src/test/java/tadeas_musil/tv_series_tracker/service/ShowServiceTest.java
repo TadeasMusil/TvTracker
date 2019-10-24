@@ -22,6 +22,7 @@ import java.util.List;
 @SpringBootTest(properties = { "trakt_tv.api.uri.search_show_by_id=http://localhost:8080/test",
                                "trakt_tv.api.uri.search_shows_by_query=http://localhost:8080/test",
                                "trakt_tv.api.uri.search_get_schedule=http://localhost:8080/test",
+                               "trakt_tv.api.uri.search_premiering_shows=http://localhost:8080/test",
                                "tvmaze.api.uri.search_show_by_tvdbid=http://localhost:8080/test" })
 @RunWith(SpringRunner.class)
 public class ShowServiceTest {
@@ -48,7 +49,7 @@ public class ShowServiceTest {
   }
 
   @Test
-  public void searchShows_shouldReturn10Shows() throws Exception {
+  public void searchShows_shouldReturnTenShows() throws Exception {
     givenThat(get("/test").willReturn(aResponse().withStatus(200)
                                                .withHeader("X-Pagination-Page-Count", "20")
                                                .withHeader("Content-Type", "application/json")
@@ -106,4 +107,17 @@ public class ShowServiceTest {
     assertThat(showService.getImageUrl("id")).isEqualTo("");
   }
 
+  @Test
+  public void getPremieringShows_shouldReturnThreeShows_WhenOneShowHasImdbIdNull() {
+    givenThat(get("/test").willReturn(aResponse().withStatus(200)
+                                               .withHeader("Content-Type", "application/json")
+                                               .withBodyFile("get-premiering-shows.json")));
+    
+    List<Show> episodes = showService.getPremieringShows();
+    
+    assertThat(episodes).hasSize(3)
+                        .first().hasFieldOrPropertyWithValue("title", "True Blood")
+                                .hasFieldOrPropertyWithValue("year", 2008);
+
+  }
 }

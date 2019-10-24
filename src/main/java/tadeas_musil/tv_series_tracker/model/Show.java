@@ -1,19 +1,24 @@
 package tadeas_musil.tv_series_tracker.model;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.*;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
@@ -35,6 +40,15 @@ public class Show {
     private String imageUrl;
 
     private int year;
+
+    @Getter(value = AccessLevel.NONE)
+    private boolean shouldGetRatingChecked = false;
+
+    private boolean isRecommended = false;
+
+    @CreationTimestamp
+    // @Column(name = "creation_date")
+    protected LocalDate creationDate;
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "followedShows")
     private Set<User> users = new HashSet<>();
@@ -71,6 +85,8 @@ public class Show {
         return true;
     }
 
-    
+    public boolean shouldGetRatingChecked() {
+        return this.shouldGetRatingChecked;
+    }
 
 }

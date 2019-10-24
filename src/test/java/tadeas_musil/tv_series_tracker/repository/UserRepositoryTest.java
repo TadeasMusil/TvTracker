@@ -1,5 +1,10 @@
 package tadeas_musil.tv_series_tracker.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,10 +14,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import tadeas_musil.tv_series_tracker.model.Show;
 import tadeas_musil.tv_series_tracker.model.User;
-import static org.assertj.core.api.Assertions.*;
-
-import java.util.ArrayList;
-import java.util.List;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public class UserRepositoryTest {
@@ -26,18 +27,18 @@ public class UserRepositoryTest {
     public void setUp(){
         Show planetEarth = new Show();
         planetEarth.setTraktId("planetEarthId");
-        
-        joe = new User();
-        joe.setUsername("joe@email.com");
-        joe.getFollowedShows().add(planetEarth);
-        joe = repository.save(joe);
-
         Show cosmos = new Show();
         cosmos.setTraktId("cosmosId");
         
+        joe = new User();
+        joe.setGettingScheduleNotification(true);
+        joe.setUsername("joe@email.com");
+        joe.getFollowedShows().add(planetEarth);
+        joe.getFollowedShows().add(cosmos);
+        repository.save(joe);
+
         User tom = new User();
         tom.setUsername("tom@email.com");
-        tom.getFollowedShows().add(cosmos);
         repository.save(tom);
     }
    
@@ -50,25 +51,39 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void findAllTrackingAtLeastOneShowFetchShows_shouldReturnEmptyList_whenZeroUsersOptInForNotifications(){
-        List<String> airingShows = new ArrayList<>();
-        airingShows.add("planetEarthId");
+    public void findByIsGettingScheduleNotificationAndShowIdIn_shouldReturnCorrectUser(){
+        List<String> airingShows = List.of("planetEarthId");
         
-        List<User> users = repository.findAllTrackingAtLeastOneShowFetchShows(airingShows);
+        List<User> users = repository.findByIsGettingScheduleNotificationAndShowIdIn(true, airingShows);
         
-        assertThat(users.isEmpty());
+        assertThat(users).hasSize(1)
+                         .first().isEqualTo(joe);
     }
 
     @Test
-    public void findAllTrackingAtLeastOneShowFetchShows_shouldFindOneCorrectUser(){
+    public void findByIsGettingScheduleNotificationAndShowIdIn_shouldReturnEmptyList_whenZeroUsersOptInForNotifications(){
+        List<String> airingShows = List.of("planetEarthId");
+        joe.setGettingScheduleNotification(false);
+        
+        List<User> users = repository.findByIsGettingScheduleNotificationAndShowIdIn(true, airingShows);
+        
+        assertThat(users).isEmpty();
+    }
+
+     @Test
+    public void findByIsGettingScheduleNotificationAndShowIdIn_shouldReturnEmptyList_givenEmptyShowIdList(){
         List<String> airingShows = new ArrayList<>();
-        airingShows.add("planetEarthId");
-        joe.setDailyScheduleNotification(true);
         
-        List<User> users = repository.findAllTrackingAtLeastOneShowFetchShows(airingShows);
+        List<User> users = repository.findByIsGettingScheduleNotificationAndShowIdIn(true, airingShows);
         
-        assertThat(users).hasSize(1);
-        assertThat(users.get(0)).isEqualTo(joe);
+        assertThat(users).isEmpty();
+    }
+
+    @Test
+    public void findByIsGettingRecommendedShowsNotification_shouldFindTwoUsers_whenTwoUsersOptInForNotifications(){        
+        List<String> users = repository.findByIsGettingRecommendedShowsNotification(true);
+        
+        assertThat(users).hasSize(2);
     }
 
 }

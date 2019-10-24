@@ -1,11 +1,11 @@
 package tadeas_musil.tv_series_tracker.scheduled;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.*;
 
 import javax.mail.internet.MimeMessage;
 
@@ -28,14 +28,15 @@ import tadeas_musil.tv_series_tracker.model.User;
 import tadeas_musil.tv_series_tracker.repository.UserRepository;
 import tadeas_musil.tv_series_tracker.service.ShowService;
 
-@SpringBootTest(properties = { "spring.mail.host=localhost",
+@SpringBootTest(properties = {  "spring.mail.host=localhost",
                                 "spring.mail.port=3025",
                                 "spring.mail.username=username",
                                 "spring.mail.password=password" })
+
 @RunWith(SpringRunner.class)
-public class DailyScheduleNotificationTest {
+public class ScheduleNotificationTest {
     @Autowired
-    private DailyScheduleNotification dailyScheduleNotification;
+    private ScheduleNotification dailyScheduleNotification;
     @MockBean
     private ShowService showService;
     @MockBean
@@ -47,33 +48,29 @@ public class DailyScheduleNotificationTest {
     @Before
     public void setUp() {
         greenMail.setUser("test@localhost", "username", "password");
-        Show planetEarth = new Show();
-        planetEarth.setTraktId("id");
-        planetEarth.setTitle("Planet Earth");
         
-        Episode planetEarthEpisode = new Episode();
-        planetEarthEpisode.setAirDate("21.12.2006");
-        planetEarthEpisode.setNumber("01");
-        planetEarthEpisode.setSeason("01");
-        planetEarthEpisode.setTitle("Pilot");
-        planetEarthEpisode.setShow(planetEarth);
+        Show planetEarth = new Show();
+        planetEarth.setTitle("Planet Earth");
+        planetEarth.setYear(2015);
+        
+        Episode planetEarthEpisode = new Episode(planetEarth, "01", "01", "Pilot", "21.12.2006");
+
+        List<Episode> airingEpisodes = List.of(planetEarthEpisode);
+        when(showService.getAiringEpisodes()).thenReturn(airingEpisodes);
         
         User user = new User();
         user.setUsername("test@localhost");
         user.getFollowedShows().add(planetEarth);
-        when(userRepository.findAllTrackingAtLeastOneShowFetchShows(any())).thenReturn(List.of(user));
-        
-        List<Episode> airingEpisodes = List.of(planetEarthEpisode);
-        when(showService.getAiringEpisodes()).thenReturn(airingEpisodes);
+        when(userRepository.findByIsGettingScheduleNotificationAndShowIdIn(anyBoolean(),anyList())).thenReturn(List.of(user));
     }
 
     @Test
-    public void shouldSendCorrectEmail() throws Exception {
+    public void notifyUsers_shouldSendCorrectEmail() throws Exception {
         dailyScheduleNotification.notifyUsers();
         MimeMessage[] messages = greenMail.getReceivedMessages();
         
         assertThat(messages).hasSize(1);
-        assertThat(GreenMailUtil.getBody(messages[0])).isEqualTo("Planet Earth: S01E01 Pilot 21.12.2006");
+        assertThat(GreenMailUtil.getBody(messages[0])).isEqualTo("Planet Earth(2015): S01E01 Pilot 21.12.2006");
         assertThat(messages[0].getSubject()).isEqualTo("Here are your episodes that air today!");
     }
 

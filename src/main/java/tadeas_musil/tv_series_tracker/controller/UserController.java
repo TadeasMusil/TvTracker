@@ -19,7 +19,7 @@ import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("user")
+@RequestMapping("/user")
 public class UserController {
 
 	@Autowired

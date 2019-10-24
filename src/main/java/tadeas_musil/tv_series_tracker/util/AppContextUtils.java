@@ -9,7 +9,7 @@ import lombok.Getter;
 
 
 @Component
-public class AppContextUtil implements ApplicationContextAware {
+public class AppContextUtils implements ApplicationContextAware {
     
     @Getter
     private static ApplicationContext ctx;
