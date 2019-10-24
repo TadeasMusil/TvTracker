@@ -1,9 +1,7 @@
 package tadeas_musil.tv_series_tracker.service;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
