@@ -1,12 +1,13 @@
 package tadeas_musil.tv_series_tracker.service;
 
-import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,6 +29,9 @@ public class ShowService {
     
     @Value("${trakt_tv.api.version}")
     private String traktApiVersion;
+    
+    @Value("${app.shows_per_page}")
+    private int showsPerPage;
     
     @Autowired
     private Environment env;
@@ -143,6 +147,12 @@ public class ShowService {
         if(!showRepository.existsById(show.getTraktId())){
             showRepository.save(show);
         }
+    }
+
+    public Page<Show> getRecommendedShows(int pageNumber){
+        Pageable pageable = PageRequest.of(pageNumber, showsPerPage);
+        Page<Show> page = showRepository.findByIsRecommendedOrderByCreationDateDesc(true, pageable);
+        return page;
     }
 
 }

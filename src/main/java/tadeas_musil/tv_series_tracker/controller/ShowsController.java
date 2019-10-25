@@ -1,8 +1,7 @@
 package tadeas_musil.tv_series_tracker.controller;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +35,24 @@ public class ShowsController {
 		model.addAttribute("showToTrack",new Show());
 		
 		return "shows-search";
+	}
+
+	@RequestMapping("/recommended")
+	public String showRecommendedShows(@RequestParam Integer pageNumber, Model model)
+			throws Exception {
+		Page<Show> page = showService.getRecommendedShows(pageNumber);
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentRequest();
+		String nextPage = builder.replaceQueryParam("page", pageNumber + 1).toUriString();
+		String previousPage = builder.replaceQueryParam("page", pageNumber - 1).toUriString();
+		
+		model.addAttribute("shows", page.getContent());
+		model.addAttribute("currentPage", pageNumber);
+		model.addAttribute("totalNumberOfPages", page.getTotalPages());
+		model.addAttribute("nextPage", nextPage);
+		model.addAttribute("previousPage", previousPage);
+		model.addAttribute("showToTrack",new Show());
+		
+		return "recommended-shows";
 	}
 	
 }
