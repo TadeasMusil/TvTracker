@@ -21,6 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -117,14 +118,14 @@ public class ShowServiceTest {
   }
 
   @Test
-  public void getPremieringShows_shouldReturnThreeShows_WhenOneShowHasImdbIdNull() {
+  public void getPremieringShows_shouldReturnTwoShows_WhenOneShowHasImdbIdNullAndOneShowHasIncorrectImdbIdFormat() {
     givenThat(get("/test").willReturn(aResponse().withStatus(200)
                                                .withHeader("Content-Type", "application/json")
                                                .withBodyFile("get-premiering-shows.json")));
     
     List<Show> episodes = showService.getPremieringShows();
     
-    assertThat(episodes).hasSize(3)
+    assertThat(episodes).hasSize(2)
                         .first().hasFieldOrPropertyWithValue("title", "True Blood")
                                 .hasFieldOrPropertyWithValue("year", 2008);
 
@@ -135,7 +136,7 @@ public class ShowServiceTest {
     Show planetEarth = new Show();
     planetEarth.setTitle("planetEarth");
     Page<Show> page = new PageImpl<Show>(List.of(planetEarth));
-    when(showRepository.findByIsRecommendedOrderByCreationDateDesc(true, any())).thenReturn(page);
+    when(showRepository.findByIsRecommendedOrderByReleaseDateDesc(anyBoolean(), any())).thenReturn(page);
     
     Page<Show> recommendedShows = showService.getRecommendedShows(0);
     

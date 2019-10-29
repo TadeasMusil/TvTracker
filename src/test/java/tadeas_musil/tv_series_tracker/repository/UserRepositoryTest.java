@@ -35,7 +35,7 @@ public class UserRepositoryTest {
         joe.setUsername("joe@email.com");
         joe.getFollowedShows().add(planetEarth);
         joe.getFollowedShows().add(cosmos);
-        repository.save(joe);
+        joe = repository.save(joe);
 
         User tom = new User();
         tom.setUsername("tom@email.com");

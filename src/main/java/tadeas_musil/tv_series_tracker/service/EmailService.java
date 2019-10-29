@@ -1,6 +1,7 @@
 package tadeas_musil.tv_series_tracker.service;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -57,9 +58,9 @@ public class EmailService {
         return builder.toString();
     }
 
-    public String createMessageTextShows(List<Show> shows) {
+    public String createMessageTextShows(Set<Show> recommendedShows) {
         StringBuilder builder = new StringBuilder();
-        shows.forEach(show -> builder
+        recommendedShows.forEach(show -> builder
                         .append(show.getTitle())
                         .append(" (")
                         .append(show.getYear())

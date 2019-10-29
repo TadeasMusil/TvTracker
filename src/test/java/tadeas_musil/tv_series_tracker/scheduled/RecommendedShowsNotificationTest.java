@@ -1,17 +1,17 @@
 package tadeas_musil.tv_series_tracker.scheduled;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.mail.internet.MimeMessage;
 
+import com.google.common.collect.Sets;
 import com.icegreen.greenmail.junit.GreenMailRule;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
@@ -68,21 +68,26 @@ public class RecommendedShowsNotificationTest {
 
         when(fileService.parseTsv(anyString())).thenReturn(List.of(new ShowRating("id1", 10.0, 2000)));
 
-        Show planetEarth = new Show();
-        planetEarth.setTitle("Planet Earth");
-        planetEarth.setImdbId("id1");
-        planetEarth.setYear(2015);
-        when(showService.getPremieringShows()).thenReturn(Arrays.asList(planetEarth));
+        
+        when(showService.getPremieringShows()).thenReturn(Arrays.asList(getPlanetEarth()));
 
         User user = new User();
         user.setUsername("test@localhost");
         when(userRepository.findByIsGettingRecommendedShowsNotification(true)).thenReturn(List.of(user.getUsername()));
 
     }
+    
+    private Show getPlanetEarth(){
+        Show planetEarth = new Show();
+        planetEarth.setTitle("Planet Earth");
+        planetEarth.setImdbId("id1");
+        planetEarth.setYear(2015);
+        return planetEarth;
+    }
 
     @Test
     public void notifyUsers_shouldSendCorrectEmail_givenOneNewRecommendedShow() throws Exception {
-        when(showRatingService.checkRatings(anyList(), anyList())).then(returnsFirstArg());
+        when(showRatingService.checkRatings(anyList(), anyList())).thenReturn(Sets.newHashSet(getPlanetEarth()));
 
         recommendedShowsNotification.notifyUsers();
         MimeMessage[] messages = greenMail.getReceivedMessages();
@@ -94,7 +99,7 @@ public class RecommendedShowsNotificationTest {
 
     @Test
     public void notifyUsers_shouldSendZeroEmails_givenNoNewRecommendedShow() throws Exception {
-        when(showRatingService.checkRatings(anyList(), anyList())).thenReturn(new ArrayList<Show>());
+        when(showRatingService.checkRatings(anyList(), anyList())).thenReturn(new HashSet<Show>());
 
         recommendedShowsNotification.notifyUsers();
         MimeMessage[] messages = greenMail.getReceivedMessages();

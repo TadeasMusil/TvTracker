@@ -3,6 +3,7 @@ package tadeas_musil.tv_series_tracker.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -17,12 +18,14 @@ public class EmailServiceTest {
   @Test
   public void createMessageTextShows_shouldReturnCorrectMessage_givenTwoShows(){
     Show planetEarth = new Show();
+    planetEarth.setTraktId("planetId");
     planetEarth.setTitle("Planet Earth");
     planetEarth.setYear(2015);
     Show cosmos = new Show();
+    cosmos.setTraktId("cosmosId");
     cosmos.setTitle("Cosmos");
     cosmos.setYear(2007);
-    List<Show> shows = List.of(planetEarth,cosmos);
+    Set<Show> shows = Set.of(planetEarth,cosmos);
     
     String message = emailService.createMessageTextShows(shows);
     

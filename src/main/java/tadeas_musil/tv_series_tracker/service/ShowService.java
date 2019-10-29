@@ -1,5 +1,6 @@
 package tadeas_musil.tv_series_tracker.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ public class ShowService {
     }
 
     public List<Show> getPremieringShows(){
-        String date = DateUtils.getCurrentDate().toString();
+        LocalDate date = DateUtils.getCurrentDate();
             
         List<Show> shows = webClient
         .get()
@@ -111,10 +112,11 @@ public class ShowService {
         .retrieve()
         .bodyToFlux(Episode.class)
         .map(episode -> episode.getShow())
-        .filter(show -> show.getImdbId() != null)
+        .filter(show -> show.getImdbId() != null && show.getImdbId().startsWith("tt"))
         .collectList()
         .block();
 
+        shows.forEach(show -> show.setReleaseDate(date));
         return shows;
     }
 
@@ -143,16 +145,16 @@ public class ShowService {
         }
     }
 
-    public void saveNewShow(Show show) {
-        if(!showRepository.existsById(show.getTraktId())){
-            showRepository.save(show);
-        }
-    }
-
     public Page<Show> getRecommendedShows(int pageNumber){
         Pageable pageable = PageRequest.of(pageNumber, showsPerPage);
-        Page<Show> page = showRepository.findByIsRecommendedOrderByCreationDateDesc(true, pageable);
+        Page<Show> page = showRepository.findByIsRecommendedOrderByReleaseDateDesc(true, pageable);
         return page;
+    }
+
+    public void setReleaseDateForExistingShow(LocalDate date, String showId){
+        if(showRepository.existsById(showId)){
+            showRepository.setReleaseDate(date, showId);
+        }
     }
 
 }
