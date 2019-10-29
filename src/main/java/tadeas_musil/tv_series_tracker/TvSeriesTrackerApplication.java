@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.netty.http.client.HttpClient;
 import tadeas_musil.tv_series_tracker.config_properties.ImdbRatingsProperties;
+
 @EnableScheduling
 @EnableConfigurationProperties(ImdbRatingsProperties.class)
 @SpringBootApplication
