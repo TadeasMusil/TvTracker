@@ -3,3 +3,10 @@ sudo: true
 jdk: oraclejdk11
 before_install:
 - chmod +x mvnw
+deploy:
+  provider: heroku
+  api_key:
+    secure: KZcoiF4xkAWYAZfE9m9WGS9nsDUdyeBkh/CWxMD+i9H6Qy/1ao0Ht2R+5xVoWtHd7oSA6VitNwebAFSGBEqW0uctcuLDhwCUs+zIKqByBfvTDlUA9TM45dabdx1EPY1kXBI/3xHXRbF3mC00gVMznkBpX+GgJ/ikPt4Qj9m2pb4V7Fwi9jqsEru+mMPxQVfT642l15XHcB3LbFGaK0xxpn9ULoTf/NYFsXahsBokslR4eQSqmcVIo7E2Di/De513ZCJoT4hCmAPY9uGRCd9/LVObkBin3EvAngIy2LOFPC9hejvTlAH+t7VxOPBq3sBnkAQgrrEhRq54KfcACiTec77yJypsNxJCzLjkHeV+Q2aFV9GsdfowuzS1ecK5cRfhAJSQX4cTNomPgcSgJB6jcDBOR2DTmTyVvItXPhG5Er2HK46WWv/ON91MDjgyYeJW/CbhtHoIlfJq02+NzwzPHt0KCwKgzcb58Z2hFz0Zk2izbQcW8zBnfvYGjg5NsF/3yEGD9FGnfPEymLep5ScunM9iI0+vsFFY7dptWoGEfHqOib4Hsc5jZYsPJqb7bfElyqtPhSZdshcS3Q8x90SwVTkEULRveMVVr/p/78nEYBwem9R6tZ/9WX4VvMysS90wv4el+CE6hEZWPF0eTVfnsMYhyeiDhseJ/RsG7FHIVoE=
+  app: tvtracker1
+  on:
+    repo: TadeasMusil/TvTracker

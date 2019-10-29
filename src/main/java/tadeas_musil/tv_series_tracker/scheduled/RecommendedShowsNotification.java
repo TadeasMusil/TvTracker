@@ -2,8 +2,7 @@ package tadeas_musil.tv_series_tracker.scheduled;
 
 import java.io.File;
 import java.util.List;
-
-import javax.annotation.PreDestroy;
+import java.util.Set;
 
 import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
@@ -35,7 +34,7 @@ public class RecommendedShowsNotification {
     private ImdbRatingsProperties imdbProperties;
 
     @Value("${app.scheduled.new_show_notification.subject}")
-    private String subject;
+    private String emailSubject;
 
     @Autowired
     private ShowRepository showRepository;
@@ -51,14 +50,14 @@ public class RecommendedShowsNotification {
 
     @Scheduled(cron = "${cron.recommended_shows_notification}", zone = "${app.timezone}")
     public void notifyUsers() {
-        List<Show> showsToRecommend = findNewRecommendations(getRatings());
+        Set<Show> recommendedShows = findNewRecommendations(getRatings());
 
-        if (CollectionUtils.isNotEmpty(showsToRecommend)) {
+        if (CollectionUtils.isNotEmpty(recommendedShows)) {
             List<String> usersToNotify = userRepository.findByIsGettingRecommendedShowsNotification(true);
-            String messageText = emailService.createMessageTextShows(showsToRecommend);
+            String messageText = emailService.createMessageTextShows(recommendedShows);
 
             for (String username : usersToNotify) {
-                emailService.sendEmail(username, subject, messageText);
+                emailService.sendEmail(username, emailSubject, messageText);
             }
         }
     }
@@ -66,21 +65,23 @@ public class RecommendedShowsNotification {
     private List<ShowRating> getRatings() {
         fileService.downloadFile(imdbProperties.getUrl(), imdbProperties.getDownloadLocation());
         fileService.decompressGzip(imdbProperties.getDownloadLocation(), imdbProperties.getDecompressionLocation());
-        return fileService.parseTsv(imdbProperties.getDecompressionLocation());
+        List<ShowRating> ratings = fileService.parseTsv(imdbProperties.getDecompressionLocation());
+        deleteFiles();
+        return ratings;
     }
 
-    private List<Show> findNewRecommendations(List<ShowRating> ratings) {
+    private Set<Show> findNewRecommendations(List<ShowRating> ratings) {
         List<Show> premieringShows = showService.getPremieringShows();
-        List<Show> showsToBeChecked = showRepository.findAllByShouldGetRatingChecked(true);
+        premieringShows.forEach(show -> showService.setReleaseDateForExistingShow(show.getReleaseDate(),show.getTraktId()));
 
-        List<Show> showsToRecommend = showRatingService.checkRatings(premieringShows, ratings);
-        showsToRecommend.addAll(showRatingService.checkRatings(showsToBeChecked, ratings));
+        List<Show> existingShowsToCheck = showRepository.findAllByShouldGetRatingChecked(true);
 
-        return showsToRecommend;
+        Set<Show> recommendedShows = showRatingService.checkRatings(premieringShows, ratings);
+        recommendedShows.addAll(showRatingService.checkRatings(existingShowsToCheck, ratings));
+        return recommendedShows;
     }
 
-    @PreDestroy
-    private void cleanUp() {
+    private void deleteFiles() {
         File downloadedFile = new File(imdbProperties.getDownloadLocation());
         downloadedFile.delete();
         File decompressedFile = new File(imdbProperties.getDecompressionLocation());

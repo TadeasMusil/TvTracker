@@ -7,15 +7,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import tadeas_musil.tv_series_tracker.model.Episode;
 import tadeas_musil.tv_series_tracker.model.SearchResult;
 import tadeas_musil.tv_series_tracker.model.Show;
+import tadeas_musil.tv_series_tracker.repository.ShowRepository;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -29,6 +36,9 @@ public class ShowServiceTest {
   
   @Autowired
   private ShowService showService;
+
+  @MockBean
+  private ShowRepository showRepository;
   
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(
@@ -108,16 +118,30 @@ public class ShowServiceTest {
   }
 
   @Test
-  public void getPremieringShows_shouldReturnThreeShows_WhenOneShowHasImdbIdNull() {
+  public void getPremieringShows_shouldReturnTwoShows_WhenOneShowHasImdbIdNullAndOneShowHasIncorrectImdbIdFormat() {
     givenThat(get("/test").willReturn(aResponse().withStatus(200)
                                                .withHeader("Content-Type", "application/json")
                                                .withBodyFile("get-premiering-shows.json")));
     
     List<Show> episodes = showService.getPremieringShows();
     
-    assertThat(episodes).hasSize(3)
+    assertThat(episodes).hasSize(2)
                         .first().hasFieldOrPropertyWithValue("title", "True Blood")
                                 .hasFieldOrPropertyWithValue("year", 2008);
+
+  }
+
+  @Test
+  public void getRecommendedShows_shouldReturnThreeShows_WhenOneShowHasImdbIdNull() {
+    Show planetEarth = new Show();
+    planetEarth.setTitle("planetEarth");
+    Page<Show> page = new PageImpl<Show>(List.of(planetEarth));
+    when(showRepository.findByIsRecommendedOrderByReleaseDateDesc(anyBoolean(), any())).thenReturn(page);
+    
+    Page<Show> recommendedShows = showService.getRecommendedShows(0);
+    
+    assertThat(recommendedShows.getContent()).hasSize(1)
+                                              .first().isEqualTo(planetEarth);
 
   }
 }

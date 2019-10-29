@@ -14,8 +14,6 @@ import javax.persistence.ManyToMany;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.hibernate.annotations.CreationTimestamp;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,8 +46,7 @@ public class Show {
 
     private boolean isRecommended = false;
 
-    @CreationTimestamp
-    protected LocalDate creationDate;
+    private LocalDate releaseDate;
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "followedShows")
     private Set<User> users = new HashSet<>();

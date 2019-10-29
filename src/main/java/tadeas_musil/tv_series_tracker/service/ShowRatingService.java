@@ -1,16 +1,17 @@
 package tadeas_musil.tv_series_tracker.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import tadeas_musil.tv_series_tracker.config_properties.ImdbRatingsProperties;
 import tadeas_musil.tv_series_tracker.model.Show;
 import tadeas_musil.tv_series_tracker.model.ShowRating;
+import tadeas_musil.tv_series_tracker.model.comparator.ShowComparator;
 import tadeas_musil.tv_series_tracker.repository.ShowRepository;
 import tadeas_musil.tv_series_tracker.util.DateUtils;
 
@@ -23,14 +24,11 @@ public class ShowRatingService {
     @Autowired
     private ShowRepository showRepository;
 
-    @Autowired
-    private ShowService showService;
-
-    @Value("${app.timezone}")
-    private String timezone;
-
     public ShowRating getShowRating(List<ShowRating> ratings, String imdbId) {
         int index = Collections.binarySearch(ratings, new ShowRating(imdbId));
+        if (index < 0) {
+            return new ShowRating(imdbId, 0, 0);
+        }
         return ratings.get(index);
     }
 
@@ -43,41 +41,57 @@ public class ShowRatingService {
         return rating.getNumberOfVotes() >= imdbProperties.getRequiredVotes();
     }
 
-    public void checkRating(Show show, List<ShowRating> ratings, List<Show> showsToRecommend) {
+    public void checkOldRating(Show show, List<ShowRating> ratings, Set<Show> recommendedShows) {
+        ShowRating showRating = getShowRating(ratings, show.getImdbId());
+
+        if (meetsRequiredRatingAndVotes(showRating)) {
+            showRepository.setIsRecommended(true, show.getTraktId());
+            showRepository.setShouldGetRatingChecked(false, show.getTraktId());
+            recommendedShows.add(show);
+        } else if (meetsRequiredVotes(showRating)) {
+            showRepository.setShouldGetRatingChecked(false, show.getTraktId());
+        } else {
+            stopFutureChecksIfOld(show);
+        }
+    }
+
+    public void checkNewRating(Show show, List<ShowRating> ratings, Set<Show> recommendedShows) {
         ShowRating showRating = getShowRating(ratings, show.getImdbId());
 
         if (meetsRequiredRatingAndVotes(showRating)) {
             show.setRecommended(true);
-            showsToRecommend.add(show);
-        } else if (meetsRequiredVotes(showRating)) {
-            show.setShouldGetRatingChecked(false);
-            return;
-        }
-        show.setShouldGetRatingChecked(true);
-        stopFutureChecksIfOldOrRecommended(show);
-        showService.saveNewShow(show);
-
-    }
-
-    public void stopFutureChecksIfOldOrRecommended(Show show) {
-        int ageInDays = DateUtils.getAge(show.getCreationDate()).getDays();
-        if (ageInDays > imdbProperties.getMaxAge() || show.isRecommended()) {
-            show.setShouldGetRatingChecked(false);
+            showRepository.save(show);
+            recommendedShows.add(show);
+        } else if (!meetsRequiredVotes(showRating)) {
+            show.setShouldGetRatingChecked(true);
             showRepository.save(show);
         }
     }
 
-    public List<Show> checkRatings(List<Show> shows, List<ShowRating> ratings) {
-        List<Show> showsToRecommend = new ArrayList<>();
-        shows.forEach(show -> checkRating(show, ratings, showsToRecommend));
-        return showsToRecommend;
+    public void stopFutureChecksIfOld(Show show) {
+        int ageInDays = DateUtils.getAge(show.getReleaseDate()).getDays();
+        if (ageInDays > imdbProperties.getMaxAge()) {
+            showRepository.setShouldGetRatingChecked(false, show.getTraktId());
+        }
     }
 
-    public ShowRatingService(ImdbRatingsProperties imdbProperties, ShowRepository showRepository,
-            ShowService showService) {
+    public Set<Show> checkRatings(List<Show> shows, List<ShowRating> ratings) {
+        // Using TreeSet with comparator to filter duplicates, because TraktTV sometimes has duplicates of the same show
+        Set<Show> recommendedShows = new TreeSet<>(new ShowComparator());
+        for (Show show : shows) {
+            if (showRepository.existsById(show.getTraktId())) {
+                checkOldRating(show, ratings, recommendedShows);
+            }
+            else{
+                checkNewRating(show, ratings, recommendedShows);
+            }
+        }
+        return recommendedShows;
+    }
+
+    public ShowRatingService(ImdbRatingsProperties imdbProperties, ShowRepository showRepository) {
         this.imdbProperties = imdbProperties;
         this.showRepository = showRepository;
-        this.showService = showService;
     }
 
 }
