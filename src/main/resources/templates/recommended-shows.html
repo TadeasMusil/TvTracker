@@ -48,9 +48,9 @@
 
     <!-- Next and Previous page links-->
     <div style="height: 50px">
-        <a th:unless="${currentPage == 1}" th:href="${previousPage}"
+        <a th:unless="${currentPage == 0}" th:href="${previousPage}"
             class="btn btn-sm btn-primary previous no-outline">&#8249; Previous</a>
-        <a th:unless="${currentPage == totalNumberOfPages}" th:href="${nextPage}"
+        <a th:unless="${currentPage == totalNumberOfPages || totalNumberOfPages == 1}" th:href="${nextPage}"
             class="btn btn-sm btn-primary next no-outline">Next &#8250;</a>
     </div>
     <!--Footer-->
