@@ -9,7 +9,7 @@
   <div th:fragment="navbar" class="py-2">
     <nav class="navbar navbar-expand-lg ">
       <!-- Logo -->
-      <a class="navbar-brand logo-sign text-center pr-5" href="/"><b><b>TV<br>Tracker<br></b></b></a>
+      <a class="navbar-brand logo-sign text-center" href="/"><b><b>TV<br>Tracker<br></b></b></a>
       <!-- Hamburger icon -->
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,8 +17,8 @@
       </button>
       <!-- User dropdown -->
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav">
-          <li class="nav-item dropdown pl-5 pr-5">
+        <ul class="navbar-nav navbar-spacing">
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle navbar-link" href="#" id="navbarDropdown" role="button"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               User
@@ -38,18 +38,18 @@
           </li>
           <!-- New recommended shows -->
           <li class="nav-item active">
-            <a class="nav-link navbar-link pl-5 pr-5" href="/shows/recommended?pageNumber=0">New recommended
+            <a class="nav-link navbar-link" href="/shows/recommended?pageNumber=0">New recommended
               shows <span class="sr-only">(current)</span></a>
           </li>
 
-        </ul>
+        
         <!-- Search bar -->
-        <form class="form-inline my-2 my-lg-0 pl-5 pr-5" id="searchForm">
+        <form class="form-inline my-2 my-lg-0" id="searchForm">
           <input class="form-control" type="search" id="searchInput" placeholder="Search shows" aria-label="Search">
           <button class="btn btn-primary my-2 my-sm-0" type="reset">Search</button>
         </form>
         <!-- Github icon -->
-        <div class="nav-item pl-5">
+        <div class="nav-item">
           <a class="nav-link " href="https://github.com/TadeasMusil/TvTracker"><img src="/images/github-icon.png"></a>
         </div>
       </div>

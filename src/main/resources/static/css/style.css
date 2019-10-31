@@ -208,4 +208,8 @@ margin-left: 4px;
         font-size: xx-large;
         color:#EB5160;
     }
+    .navbar-spacing{
+        width: 100%;
+        justify-content: space-around;
+    }
   
