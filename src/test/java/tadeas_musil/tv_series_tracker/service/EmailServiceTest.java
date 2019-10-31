@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Set;
 
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 
 import tadeas_musil.tv_series_tracker.model.Episode;
@@ -25,7 +26,7 @@ public class EmailServiceTest {
     cosmos.setTraktId("cosmosId");
     cosmos.setTitle("Cosmos");
     cosmos.setYear(2007);
-    Set<Show> shows = Set.of(planetEarth,cosmos);
+    Set<Show> shows = Sets.newLinkedHashSet(planetEarth,cosmos);
     
     String message = emailService.createMessageTextShows(shows);
     

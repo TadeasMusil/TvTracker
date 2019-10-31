@@ -144,8 +144,11 @@ public class ShowService {
             }
         }
     }
-
+    // adding missing images here to preserve memory, because heroku quotas were getting exceeded during recommended shows notification
     public Page<Show> getRecommendedShows(int pageNumber){
+        List<Show> showsWithoutImage = showRepository.findByIsRecommendedAndImageUrl(true, null);
+        showsWithoutImage.forEach(show -> showRepository.setImageUrl(getImageUrl(show.getTvdbId()), show.getTraktId()));
+        
         Pageable pageable = PageRequest.of(pageNumber, showsPerPage);
         Page<Show> page = showRepository.findByIsRecommendedOrderByReleaseDateDesc(true, pageable);
         return page;

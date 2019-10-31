@@ -89,7 +89,6 @@ public class ShowServiceTest {
                                 .hasFieldOrPropertyWithValue("number", "4")
                         .extracting(Episode::getShow).hasFieldOrPropertyWithValue("title", "True Blood")
                                                      .hasFieldOrPropertyWithValue("year", 2008);
-
   }
 
   @Test
@@ -128,7 +127,6 @@ public class ShowServiceTest {
     assertThat(episodes).hasSize(2)
                         .first().hasFieldOrPropertyWithValue("title", "True Blood")
                                 .hasFieldOrPropertyWithValue("year", 2008);
-
   }
 
   @Test
@@ -142,6 +140,7 @@ public class ShowServiceTest {
     
     assertThat(recommendedShows.getContent()).hasSize(1)
                                               .first().isEqualTo(planetEarth);
-
   }
+
+
 }
