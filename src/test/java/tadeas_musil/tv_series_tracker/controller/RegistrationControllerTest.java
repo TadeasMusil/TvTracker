@@ -19,7 +19,7 @@ import tadeas_musil.tv_series_tracker.model.User;
 import tadeas_musil.tv_series_tracker.service.UserService;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = RegistrationController.class, secure = false)
+@WebMvcTest(value = RegistrationController.class)
 public class RegistrationControllerTest {
     
     @Autowired

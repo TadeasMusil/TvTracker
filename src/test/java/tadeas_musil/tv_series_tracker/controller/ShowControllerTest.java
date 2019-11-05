@@ -26,7 +26,7 @@ import tadeas_musil.tv_series_tracker.model.Show;
 import tadeas_musil.tv_series_tracker.service.ShowService;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = ShowsController.class, secure = false)
+@WebMvcTest(value = ShowsController.class)
 public class ShowControllerTest {
     
     @Autowired
