@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @Configuration
@@ -20,8 +21,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetailsService;
 
     @Autowired
+    private OidcUserService customOidcUserService;
+
+    @Autowired
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailsService)
+            .passwordEncoder(passwordEncoder());
     }
 
     @Override
@@ -31,13 +36,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers("/user/*").authenticated()
         .anyRequest()
         .permitAll()
-        .and()
+            .and()
         .formLogin()
-            .loginPage("/login").defaultSuccessUrl("/user/settings")
-            .permitAll()
-        .and()
-        .logout()
-        .permitAll();
+            .loginPage("/login")
+            .defaultSuccessUrl("/user/settings")
+            .and()
+        .oauth2Login(oauth ->   oauth.loginPage("/login")
+                                    .userInfoEndpoint()
+                                    .oidcUserService(customOidcUserService));
 
     }
 
