@@ -26,13 +26,13 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping("/updateUser")
-	public String updateUser(@Validated(Settings.class) @ModelAttribute("user") User updatedInfo,
+	public String updateUser(@Validated(Settings.class) @ModelAttribute("user") User updatedUser,
 			BindingResult bindingResult, Principal principal) {
 		if (bindingResult.hasErrors()) {
 			return "settings";
 		}
-		updatedInfo.setUsername(principal.getName());
-		userService.updateUser(updatedInfo);
+		updatedUser.setUsername(principal.getName());
+		userService.updateUser(updatedUser);
 		return "settings";
 	}
 

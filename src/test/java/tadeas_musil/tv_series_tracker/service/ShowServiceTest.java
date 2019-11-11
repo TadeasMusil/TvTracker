@@ -1,121 +1,140 @@
 package tadeas_musil.tv_series_tracker.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import tadeas_musil.tv_series_tracker.api.TraktTvApi;
-import tadeas_musil.tv_series_tracker.api.TvMazeApi;
+import tadeas_musil.tv_series_tracker.model.Episode;
+import tadeas_musil.tv_series_tracker.model.SearchResult;
 import tadeas_musil.tv_series_tracker.model.Show;
-import tadeas_musil.tv_series_tracker.model.ShowsPage;
 import tadeas_musil.tv_series_tracker.repository.ShowRepository;
-import tadeas_musil.tv_series_tracker.util.DateUtils;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(DateUtils.class)
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+@SpringBootTest(properties = { "trakt_tv.api.uri.search_show_by_id=http://localhost:8080/test",
+                               "trakt_tv.api.uri.search_shows_by_query=http://localhost:8080/test",
+                               "trakt_tv.api.uri.search_get_schedule=http://localhost:8080/test",
+                               "trakt_tv.api.uri.search_premiering_shows=http://localhost:8080/test",
+                               "tvmaze.api.uri.search_show_by_tvdbid=http://localhost:8080/test" })
+@RunWith(SpringRunner.class)
 public class ShowServiceTest {
   
-  @InjectMocks
+  @Autowired
   private ShowService showService;
 
-  @Mock
+  @MockBean
   private ShowRepository showRepository;
+  
+  @Rule
+  public WireMockRule wireMockRule = new WireMockRule(
+    options().usingFilesUnderDirectory("src/test/java/tadeas_musil/tv_series_tracker/resources"));
 
-  @Mock
-  private TraktTvApi traktTvApi;
-
-  @Mock
-  private TvMazeApi tvMazeApi;
-
-  @Before
-  public void setUp(){
-    initMocks(this);
+  @Test
+  public void findShow_shouldReturnCorrectShow() {
+    givenThat(get("/test").willReturn(aResponse().withStatus(200)
+                                                 .withHeader("Content-Type", "application/json")
+                                                 .withBodyFile("search-show-by-id.json")));
+    Show show = showService.findShow("id");
+    
+    assertThat(show).hasFieldOrPropertyWithValue("title", "Bugs")
+                    .hasFieldOrPropertyWithValue("year", 1995)
+                    .hasFieldOrPropertyWithValue("traktId", "7")
+                    .hasFieldOrPropertyWithValue("imdbId", "tt0111904")
+                    .hasFieldOrPropertyWithValue("tvdbId", "77698");
   }
 
   @Test
-  public void searchShows_shouldReturnShowWithImage_givenOneShow() throws Exception {
-    Show planetEarth = new Show();
-    planetEarth.setTitle("Planet Earth");
-    planetEarth.setTvdbId("tvdbId");
-    ShowsPage page = new ShowsPage();
-    page.setTotalNumberOfPages(10);
-    page.setShows(List.of(planetEarth));
-
-    when(traktTvApi.searchShows(anyString(), anyInt())).thenReturn(page);
-    when(tvMazeApi.getImage(anyString())).thenReturn("www.image.com");
+  public void searchShows_shouldReturnTenShows() throws Exception {
+    givenThat(get("/test").willReturn(aResponse().withStatus(200)
+                                               .withHeader("X-Pagination-Page-Count", "20")
+                                               .withHeader("Content-Type", "application/json")
+                                               .withBodyFile("search-shows-by-query.json")));
     
-    ShowsPage shows = showService.searchShows("query", 1);
+    SearchResult searchResult = showService.searchShows("query", 1);
     
-    assertThat(shows.getTotalNumberOfPages()).isEqualTo(10);
-    assertThat(shows.getShows()).hasSize(1)
+    assertThat(searchResult.getTotalNumberOfPages()).isEqualTo(20);
+    assertThat(searchResult.getShows()).hasSize(10)
                                        .first().hasFieldOrPropertyWithValue("title", "Planet Earth")
-                                               .hasFieldOrPropertyWithValue("imageUrl", "www.image.com");
+                                               .hasFieldOrPropertyWithValue("year", 2006)
+                                               .hasFieldOrPropertyWithValue("traktId", "1039")
+                                               .hasFieldOrPropertyWithValue("imdbId", "tt0795176");
   }
 
   @Test
-  public void getPremieringShows_shouldReturnZeroShows_GivenShowWithNullImdbId() {
-    Show planetEarth = new Show();
-    when(traktTvApi.getPremieringShows()).thenReturn(Lists.newArrayList(planetEarth));
+  public void getSchedule_shouldReturn4Shows() {
+    givenThat(get("/test").willReturn(aResponse().withStatus(200)
+                                               .withHeader("Content-Type", "application/json")
+                                               .withBodyFile("get-airing-episodes.json")));
     
-    List<Show> shows = showService.getPremieringShows();
+    List<Episode> episodes = showService.getAiringEpisodes();
     
-    assertThat(shows).hasSize(0);
+    assertThat(episodes).hasSize(4)
+                        .first().hasFieldOrPropertyWithValue("title", "Death is Not the End")
+                                .hasFieldOrPropertyWithValue("season", "7")
+                                .hasFieldOrPropertyWithValue("number", "4")
+                        .extracting(Episode::getShow).hasFieldOrPropertyWithValue("title", "True Blood")
+                                                     .hasFieldOrPropertyWithValue("year", 2008);
   }
 
   @Test
-  public void getPremieringShows_shouldReturnZeroShows_GivenShowWithInvalidImdbIdFormat() {
-    Show planetEarth = new Show();
-    planetEarth.setImdbId("123");
-    when(traktTvApi.getPremieringShows()).thenReturn(Lists.newArrayList(planetEarth));
-    
-    List<Show> shows = showService.getPremieringShows();
-    
-    assertThat(shows).hasSize(0);
+  public void getImageUrl_shouldReturnCorrectUrl() throws Exception {
+    givenThat(get("/test").willReturn(aResponse().withStatus(200)
+                                                 .withHeader("Content-Type", "application/json")
+                                                 .withBodyFile("get-image-url.json")));
+
+    assertThat(showService.getImageUrl("id")).isEqualTo("http://static.tvmaze.com/uploads/images/original_untouched/67/169692.jpg");
   }
 
   @Test
-  public void getPremieringShows_shouldReturnShowWithNonNullReleaseDate_GivenShowWithCorrectImdbIdFormat() {
-    Show planetEarth = new Show();
-    planetEarth.setImdbId("tt123");
-    when(traktTvApi.getPremieringShows()).thenReturn(Lists.newArrayList(planetEarth));
-    
-    PowerMockito.mockStatic(DateUtils.class);
-    when(DateUtils.getCurrentDate()).thenReturn(LocalDate.now());
-    
-    List<Show> shows = showService.getPremieringShows();
-    
-    assertThat(shows).hasSize(1);
-    assertThat(shows.get(0).getReleaseDate()).isNotNull();
+  public void getImageUrl_shouldReturnEmptyString_whenResponseIs404() throws Exception {
+    givenThat(get("/test").willReturn(aResponse().withStatus(404)));
+
+    assertThat(showService.getImageUrl("id")).isEqualTo("");
   }
 
   @Test
-  public void getRecommendedShows_shouldReturnOneShow_GivenOneShow() {
+  public void getImageUrl_shouldReturnEmptyString_whenJsonPropertyImageIsNull() throws Exception {
+    givenThat(get("/test").willReturn(aResponse().withStatus(200)
+                                                 .withHeader("Content-Type", "application/json")
+                                                 .withBodyFile("image-is-null.json")));
+
+    assertThat(showService.getImageUrl("id")).isEqualTo("");
+  }
+
+  @Test
+  public void getPremieringShows_shouldReturnTwoShows_WhenOneShowHasImdbIdNullAndOneShowHasIncorrectImdbIdFormat() {
+    givenThat(get("/test").willReturn(aResponse().withStatus(200)
+                                               .withHeader("Content-Type", "application/json")
+                                               .withBodyFile("get-premiering-shows.json")));
+    
+    List<Show> episodes = showService.getPremieringShows();
+    
+    assertThat(episodes).hasSize(2)
+                        .first().hasFieldOrPropertyWithValue("title", "True Blood")
+                                .hasFieldOrPropertyWithValue("year", 2008);
+  }
+
+  @Test
+  public void getRecommendedShows_shouldReturnThreeShows_WhenOneShowHasImdbIdNull() {
     Show planetEarth = new Show();
     planetEarth.setTitle("planetEarth");
     Page<Show> page = new PageImpl<Show>(List.of(planetEarth));
     when(showRepository.findByIsRecommendedOrderByReleaseDateDesc(anyBoolean(), any())).thenReturn(page);
-    ReflectionTestUtils.setField(showService, "showsPerPage", 12);
     
     Page<Show> recommendedShows = showService.getRecommendedShows(0);
     
