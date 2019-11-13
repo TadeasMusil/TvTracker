@@ -5,6 +5,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +39,7 @@ public class CustomOidcUserService extends OidcUserService {
       user.setUsername(googleUserInfo.getEmail());
       userRepository.save(user);
     }
-
-    return oidcUser;
+    // Here we are changing nameAttributeKey to "email", so when we call Principal.getName() we get the user's email
+    return new DefaultOidcUser(oidcUser.getAuthorities(), oidcUser.getIdToken(), oidcUser.getUserInfo(), "email");
   }
 }
