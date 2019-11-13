@@ -212,4 +212,10 @@ margin-left: 4px;
         width: 100%;
         justify-content: space-around;
     }
+    .oauth-icon{
+        color: #FFC312;
+    }
+    .oauth-icon:hover{
+        color: white;
+    }
   
