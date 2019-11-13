@@ -10,7 +10,7 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "imdb.ratings")
 public class ImdbRatingsProperties {
 
-    private String url;
+    private String ratingsUrl;
 
     private String decompressionLocation;
 

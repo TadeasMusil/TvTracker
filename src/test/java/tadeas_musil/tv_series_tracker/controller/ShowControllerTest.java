@@ -22,7 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import tadeas_musil.tv_series_tracker.model.SearchResult;
+import tadeas_musil.tv_series_tracker.model.ShowsPage;
 import tadeas_musil.tv_series_tracker.model.Show;
 import tadeas_musil.tv_series_tracker.service.ShowService;
 
@@ -40,10 +40,10 @@ public class ShowControllerTest {
     @Test
      public void shouldReturnSearchPage() throws Exception{
         List<Show> shows = new ArrayList<>();
-        SearchResult searchResult = new SearchResult();
-        searchResult.setTotalNumberOfPages(5);
-        searchResult.setShows(shows);
-        when(showService.searchShows("query", 1)).thenReturn(searchResult);
+        ShowsPage page = new ShowsPage();
+        page.setTotalNumberOfPages(5);
+        page.setShows(shows);
+        when(showService.searchShows("query", 1)).thenReturn(page);
 
         mockMvc.perform(get("/shows/search")
                 .param("query", "query")
@@ -66,7 +66,7 @@ public class ShowControllerTest {
         when(showService.getRecommendedShows(anyInt())).thenReturn(page);
 
         mockMvc.perform(get("/shows/recommended")
-                .param("pageNumber", "1"))
+                .param("page", "1"))
         .andExpect(status().isOk())
         .andExpect(model().attributeExists("shows"))
         .andExpect(model().attributeExists("previousPage"))

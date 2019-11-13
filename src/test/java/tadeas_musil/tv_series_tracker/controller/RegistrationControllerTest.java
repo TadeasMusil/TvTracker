@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +32,7 @@ public class RegistrationControllerTest {
     UserService userService;
     
     @Test
-    public void shouldReturnRegistrationPage() throws Exception{
+    public void shouldReturnRegistrationPage() throws Exception {
     	mockMvc.perform(get("/registration"))
     	.andExpect(status().isOk())
     	.andExpect(model().attributeExists("user"))
@@ -39,20 +40,23 @@ public class RegistrationControllerTest {
     }
 
     @Test
-    public void shouldReturnIndexPage() throws Exception{
+    public void shouldReturnIndexPage() throws Exception {
         mockMvc.perform(post("/processRegistration")
             .param("username", "joe@email.com")
             .param("password", "password")
-            .param("confirmPassword", "password"))
+            .param("confirmPassword", "password")
+            .with(csrf()))
         .andExpect(status().isOk())
     	.andExpect(view().name("index"));
     }
+    
     @Test 
-    public void givenNonMatchingPasswords_shouldHaveError() throws Exception{
+    public void givenNonMatchingPasswords_shouldHaveError() throws Exception {
         mockMvc.perform(post("/processRegistration")
             .param("username", "joe@email.com")
             .param("password", "password")
-            .param("confirmPassword", "differentPassword") )
+            .param("confirmPassword", "differentPassword")
+            .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(model().attributeHasErrors("user"))
         .andExpect(model().attributeHasFieldErrors("user", "password"))
@@ -66,7 +70,8 @@ public class RegistrationControllerTest {
         mockMvc.perform(post("/processRegistration")
             .param("username", "joe@email.com")
             .param("password", "password")
-            .param("confirmPassword", "password") )
+            .param("confirmPassword", "password")
+            .with(csrf()))
         .andExpect(status().isOk())
         .andExpect(model().attributeHasErrors("user"))
         .andExpect(model().attributeHasFieldErrors("user", "username"))

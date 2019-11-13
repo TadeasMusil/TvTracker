@@ -1,7 +1,6 @@
 package tadeas_musil.tv_series_tracker.scheduled;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import tadeas_musil.tv_series_tracker.model.Episode;
-import tadeas_musil.tv_series_tracker.model.Show;
 import tadeas_musil.tv_series_tracker.model.User;
 import tadeas_musil.tv_series_tracker.repository.UserRepository;
 import tadeas_musil.tv_series_tracker.service.EmailService;
@@ -41,15 +39,15 @@ public class ScheduleNotification {
         List<User> usersToNotify = userRepository.findByIsGettingScheduleNotificationAndShowIdIn(true, airingShowsIds);
 
         for (User user : usersToNotify) {
-            List<Episode> usersAiringEpisodes = getUsersAiringEpisodes(airingEpisodes, user.getFollowedShows());
-            String messageText = emailService.createMessageTextShowsAndEpisodes(usersAiringEpisodes);
+            List<Episode> userAiringEpisodes = getAiringEpisodesByUser(airingEpisodes, user);
+            String messageText = emailService.createMessageTextShowsAndEpisodes(userAiringEpisodes);
             emailService.sendEmail(user.getUsername(), emailSubject, messageText);
         }
     }
 
-    private List<Episode> getUsersAiringEpisodes(List<Episode> airingEpisodes, Set<Show> usersShows) {
+    private List<Episode> getAiringEpisodesByUser(List<Episode> airingEpisodes, User user) {
         return airingEpisodes.stream()
-                            .filter(episode -> usersShows.contains(episode.getShow()))
+                            .filter(episode -> user.getFollowedShows().contains(episode.getShow()))
                             .collect(Collectors.toList());
         
     }

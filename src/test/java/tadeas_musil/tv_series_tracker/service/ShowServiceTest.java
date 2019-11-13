@@ -1,140 +1,134 @@
 package tadeas_musil.tv_series_tracker.service;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import tadeas_musil.tv_series_tracker.model.Episode;
-import tadeas_musil.tv_series_tracker.model.SearchResult;
-import tadeas_musil.tv_series_tracker.model.Show;
-import tadeas_musil.tv_series_tracker.repository.ShowRepository;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
+import java.util.Set;
 
-@SpringBootTest(properties = { "trakt_tv.api.uri.search_show_by_id=http://localhost:8080/test",
-                               "trakt_tv.api.uri.search_shows_by_query=http://localhost:8080/test",
-                               "trakt_tv.api.uri.search_get_schedule=http://localhost:8080/test",
-                               "trakt_tv.api.uri.search_premiering_shows=http://localhost:8080/test",
-                               "tvmaze.api.uri.search_show_by_tvdbid=http://localhost:8080/test" })
-@RunWith(SpringRunner.class)
+import com.google.common.collect.Lists;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import tadeas_musil.tv_series_tracker.api.TraktTvApi;
+import tadeas_musil.tv_series_tracker.api.TvMazeApi;
+import tadeas_musil.tv_series_tracker.model.Show;
+import tadeas_musil.tv_series_tracker.model.ShowRating;
+import tadeas_musil.tv_series_tracker.model.ShowsPage;
+import tadeas_musil.tv_series_tracker.repository.ShowRepository;
+import tadeas_musil.tv_series_tracker.util.DateUtils;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(DateUtils.class)
 public class ShowServiceTest {
   
-  @Autowired
+  @InjectMocks
   private ShowService showService;
 
-  @MockBean
+  @Mock
   private ShowRepository showRepository;
-  
-  @Rule
-  public WireMockRule wireMockRule = new WireMockRule(
-    options().usingFilesUnderDirectory("src/test/java/tadeas_musil/tv_series_tracker/resources"));
 
-  @Test
-  public void findShow_shouldReturnCorrectShow() {
-    givenThat(get("/test").willReturn(aResponse().withStatus(200)
-                                                 .withHeader("Content-Type", "application/json")
-                                                 .withBodyFile("search-show-by-id.json")));
-    Show show = showService.findShow("id");
-    
-    assertThat(show).hasFieldOrPropertyWithValue("title", "Bugs")
-                    .hasFieldOrPropertyWithValue("year", 1995)
-                    .hasFieldOrPropertyWithValue("traktId", "7")
-                    .hasFieldOrPropertyWithValue("imdbId", "tt0111904")
-                    .hasFieldOrPropertyWithValue("tvdbId", "77698");
+  @Mock
+  private TraktTvApi traktTvApi;
+
+  @Mock
+  private ShowRatingService showRatingService;
+
+  @Mock
+  private TvMazeApi tvMazeApi;
+
+  @Before
+  public void setUp(){
+    initMocks(this);
+    PowerMockito.mockStatic(DateUtils.class);
   }
 
   @Test
-  public void searchShows_shouldReturnTenShows() throws Exception {
-    givenThat(get("/test").willReturn(aResponse().withStatus(200)
-                                               .withHeader("X-Pagination-Page-Count", "20")
-                                               .withHeader("Content-Type", "application/json")
-                                               .withBodyFile("search-shows-by-query.json")));
+  public void searchShows_shouldReturnShowWithImage_givenOneShow() throws Exception {
+    Show planetEarth = new Show();
+    planetEarth.setTitle("Planet Earth");
+    planetEarth.setTvdbId("tvdbId");
+    ShowsPage page = new ShowsPage();
+    page.setTotalNumberOfPages(10);
+    page.setShows(List.of(planetEarth));
+
+    when(traktTvApi.searchShowsByQuery(anyString(), anyInt())).thenReturn(page);
+    when(tvMazeApi.getImageUrl(anyString())).thenReturn("www.image.com");
     
-    SearchResult searchResult = showService.searchShows("query", 1);
+    ShowsPage shows = showService.searchShows("query", 1);
     
-    assertThat(searchResult.getTotalNumberOfPages()).isEqualTo(20);
-    assertThat(searchResult.getShows()).hasSize(10)
+    assertThat(shows.getTotalNumberOfPages()).isEqualTo(10);
+    assertThat(shows.getShows()).hasSize(1)
                                        .first().hasFieldOrPropertyWithValue("title", "Planet Earth")
-                                               .hasFieldOrPropertyWithValue("year", 2006)
-                                               .hasFieldOrPropertyWithValue("traktId", "1039")
-                                               .hasFieldOrPropertyWithValue("imdbId", "tt0795176");
+                                               .hasFieldOrPropertyWithValue("imageUrl", "www.image.com");
   }
 
   @Test
-  public void getSchedule_shouldReturn4Shows() {
-    givenThat(get("/test").willReturn(aResponse().withStatus(200)
-                                               .withHeader("Content-Type", "application/json")
-                                               .withBodyFile("get-airing-episodes.json")));
+  public void getPremieringShows_shouldReturnZeroShows_GivenShowWithNullImdbId() {
+    Show planetEarth = new Show();
+    when(traktTvApi.getPremieringShows()).thenReturn(Lists.newArrayList(planetEarth));
     
-    List<Episode> episodes = showService.getAiringEpisodes();
+    List<Show> shows = showService.getPremieringShows();
     
-    assertThat(episodes).hasSize(4)
-                        .first().hasFieldOrPropertyWithValue("title", "Death is Not the End")
-                                .hasFieldOrPropertyWithValue("season", "7")
-                                .hasFieldOrPropertyWithValue("number", "4")
-                        .extracting(Episode::getShow).hasFieldOrPropertyWithValue("title", "True Blood")
-                                                     .hasFieldOrPropertyWithValue("year", 2008);
+    assertThat(shows).hasSize(0);
   }
 
   @Test
-  public void getImageUrl_shouldReturnCorrectUrl() throws Exception {
-    givenThat(get("/test").willReturn(aResponse().withStatus(200)
-                                                 .withHeader("Content-Type", "application/json")
-                                                 .withBodyFile("get-image-url.json")));
-
-    assertThat(showService.getImageUrl("id")).isEqualTo("http://static.tvmaze.com/uploads/images/original_untouched/67/169692.jpg");
-  }
-
-  @Test
-  public void getImageUrl_shouldReturnEmptyString_whenResponseIs404() throws Exception {
-    givenThat(get("/test").willReturn(aResponse().withStatus(404)));
-
-    assertThat(showService.getImageUrl("id")).isEqualTo("");
-  }
-
-  @Test
-  public void getImageUrl_shouldReturnEmptyString_whenJsonPropertyImageIsNull() throws Exception {
-    givenThat(get("/test").willReturn(aResponse().withStatus(200)
-                                                 .withHeader("Content-Type", "application/json")
-                                                 .withBodyFile("image-is-null.json")));
-
-    assertThat(showService.getImageUrl("id")).isEqualTo("");
-  }
-
-  @Test
-  public void getPremieringShows_shouldReturnTwoShows_WhenOneShowHasImdbIdNullAndOneShowHasIncorrectImdbIdFormat() {
-    givenThat(get("/test").willReturn(aResponse().withStatus(200)
-                                               .withHeader("Content-Type", "application/json")
-                                               .withBodyFile("get-premiering-shows.json")));
+  public void getPremieringShows_shouldReturnZeroShows_GivenShowWithInvalidImdbIdFormat() {
+    Show planetEarth = new Show();
+    planetEarth.setImdbId("123");
+    when(traktTvApi.getPremieringShows()).thenReturn(Lists.newArrayList(planetEarth));
     
-    List<Show> episodes = showService.getPremieringShows();
+    List<Show> shows = showService.getPremieringShows();
     
-    assertThat(episodes).hasSize(2)
-                        .first().hasFieldOrPropertyWithValue("title", "True Blood")
-                                .hasFieldOrPropertyWithValue("year", 2008);
+    assertThat(shows).hasSize(0);
   }
 
   @Test
-  public void getRecommendedShows_shouldReturnThreeShows_WhenOneShowHasImdbIdNull() {
+  public void getPremieringShows_shouldReturnShowWithNonNullReleaseDate_GivenShowWithCorrectImdbIdFormat() {
+    Show planetEarth = new Show();
+    planetEarth.setImdbId("tt123");
+    when(traktTvApi.getPremieringShows()).thenReturn(Lists.newArrayList(planetEarth));
+    
+    PowerMockito.mockStatic(DateUtils.class);
+    when(DateUtils.getCurrentDate()).thenReturn(LocalDate.now());
+    
+    List<Show> shows = showService.getPremieringShows();
+    
+    assertThat(shows).hasSize(1);
+    assertThat(shows.get(0).getReleaseDate()).isNotNull();
+  }
+
+  @Test
+  public void getRecommendedShows_shouldReturnOneShow_GivenOneShow() {
     Show planetEarth = new Show();
     planetEarth.setTitle("planetEarth");
     Page<Show> page = new PageImpl<Show>(List.of(planetEarth));
     when(showRepository.findByIsRecommendedOrderByReleaseDateDesc(anyBoolean(), any())).thenReturn(page);
+    ReflectionTestUtils.setField(showService, "showsPerPage", 12);
     
     Page<Show> recommendedShows = showService.getRecommendedShows(0);
     
@@ -142,5 +136,146 @@ public class ShowServiceTest {
                                               .first().isEqualTo(planetEarth);
   }
 
+  @Test
+  public void checkRatingOfNewShow_shouldReturnFalseAndSaveShowForFutureChecks_givenShowThatDoesNotMeetAnyRequirements() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
 
+      when(showRatingService.getShowRating(any(), anyString())).thenReturn(showRating);
+      
+      boolean isRecommended = showService.checkRatingOfNewShow(show, ratings);
+
+      assertFalse(isRecommended);
+      assertTrue(show.shouldGetRatingChecked());
+      verify(showRepository).save(show);
+      verifyNoMoreInteractions(showRepository);
+  }
+
+  @Test
+  public void checkRatingOfNewShow_shouldReturnTrueAndSaveShow_givenShowThatMeetsRatingAndVotesRequirements() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+      
+      when(showRatingService.meetsRequiredRatingAndVotes(any())).thenReturn(true);
+
+      boolean isRecommended = showService.checkRatingOfNewShow(show, ratings);
+
+      assertTrue(isRecommended);
+      assertFalse(show.shouldGetRatingChecked());
+      verify(showRepository).save(show);
+      verifyNoMoreInteractions(showRepository);
+  }
+
+  @Test
+  public void checkRatingOfNewShow_shouldDoNothing_givenShowThatMeetsOnlyVotesRequirement() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+      
+      when(showRatingService.meetsRequiredVotes(any())).thenReturn(true);
+      
+      boolean isRecommended = showService.checkRatingOfNewShow(show, ratings);
+
+      assertFalse(isRecommended);
+      assertFalse(show.shouldGetRatingChecked());
+      verifyZeroInteractions(showRepository);
+  }
+
+  @Test
+  public void checkRatingOfExistingShow_shouldReturnFalseAndDoNothing_givenShowThatMeetsNoRequirementsAndIsNotOld() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+      
+      when(DateUtils.getAge(any())).thenReturn(Period.ofDays(1));
+      ReflectionTestUtils.setField(showService, "showMaxAge", 30);
+      
+      boolean isRecommended = showService.checkRatingOfExistingShow(show, ratings);
+
+      assertFalse(isRecommended);
+      verifyZeroInteractions(showRepository);
+  }
+
+  @Test
+  public void checkRatingOfExistingShow_shouldReturnFalseAndStopFutureChecks_givenShowThatMeetsNoRequirementsAndIsTooOld() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+
+      when(DateUtils.getAge(any())).thenReturn(Period.ofDays(1000));
+      ReflectionTestUtils.setField(showService, "showMaxAge", 30);
+      
+      boolean isRecommended = showService.checkRatingOfExistingShow(show, ratings);
+
+      assertFalse(isRecommended);
+      verify(showRepository).setShouldGetRatingChecked(false, show.getTraktId());
+      verifyNoMoreInteractions(showRepository);
+  }
+
+  @Test
+  public void checkRatingOfExistingShow_shouldReturnTrueAndStopFutureChecks_givenShowThatMeetsRatingAndVotesRequirements() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+      
+      when(DateUtils.getAge(any())).thenReturn(Period.ofDays(1));
+      ReflectionTestUtils.setField(showService, "showMaxAge", 30);
+      when(showRatingService.meetsRequiredRatingAndVotes(any())).thenReturn(true);
+
+      boolean isRecommended = showService.checkRatingOfExistingShow(show, ratings);
+
+      assertTrue(isRecommended);
+      verify(showRepository).setIsRecommended(true, show.getTraktId());
+      verify(showRepository).setShouldGetRatingChecked(false, show.getTraktId());
+      verifyNoMoreInteractions(showRepository);
+  }
+
+  @Test
+  public void checkRatingOfExistingShow_shouldReturnFalseAndStopFutureChecks_givenShowThatMeetsOnlyVotesRequirementAndIsNotOld() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+      
+      when(DateUtils.getAge(any())).thenReturn(Period.ofDays(1));
+      ReflectionTestUtils.setField(showService, "showMaxAge", 30);
+      when(showRatingService.meetsRequiredVotes(any())).thenReturn(true);
+      
+      boolean isRecommended = showService.checkRatingOfExistingShow(show, ratings);
+
+      assertFalse(isRecommended);
+      verify(showRepository).setShouldGetRatingChecked(false, show.getTraktId());
+      verifyNoMoreInteractions(showRepository);
+  }
+
+  @Test
+  public void findRecommendedShows_shouldRecommendOneShow_givenShowThatMeetsRequirements() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+      show.setTraktId("traktId");
+      List<Show> shows = List.of(show);
+      
+      when(showRatingService.meetsRequiredRatingAndVotes(any())).thenReturn(true);
+      
+      Set<Show> recommendedShows = showService.findRecommendedShows(shows, ratings);
+
+      assertThat(recommendedShows).hasSize(1);
+  }
+
+  @Test
+  public void findRecommendedShows_shouldReturnEmptySet_givenShowThatDoesNotMeetRequirements() {
+      ShowRating showRating = new ShowRating();
+      List<ShowRating> ratings = List.of(showRating);
+      Show show = new Show();
+      show.setTraktId("traktId");
+      List<Show> shows = List.of(show);
+      
+      when(showRatingService.meetsRequiredRatingAndVotes(any())).thenReturn(false);
+
+      Set<Show> recommendedShows = showService.findRecommendedShows(shows, ratings);
+
+      assertThat(recommendedShows).isEmpty();
+  }
 }

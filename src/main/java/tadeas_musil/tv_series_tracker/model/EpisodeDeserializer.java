@@ -28,12 +28,12 @@ public class EpisodeDeserializer extends StdDeserializer<Episode> {
 
     protected EpisodeDeserializer(Class<?> vc) {
         super(vc);
-        // TODO Auto-generated constructor stub
     }
 
     protected EpisodeDeserializer() {
         this(Episode.class);
         mapper = new ObjectMapper();
+        // We can't use @Autowired, so we are getting Environment this way
         env = AppContextUtils.getCtx().getBean(Environment.class);
     }
 
