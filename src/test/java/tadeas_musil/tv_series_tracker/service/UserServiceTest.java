@@ -53,7 +53,7 @@ public class UserServiceTest {
     public void saveUser_shouldSaveUser() {
         User user = getTestUser();
 
-        userService.saveUser(user);
+        userService.createUser(user);
         User savedUser = userRepository.findByUsername(user.getUsername());
         
         assertThat(savedUser).hasFieldOrPropertyWithValue("username", user.getUsername())

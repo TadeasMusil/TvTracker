@@ -47,20 +47,30 @@ public class RecommendedShowsNotification {
             List<String> usersToNotify = userRepository.findByIsGettingRecommendedShowsNotification(true);
             String messageText = emailService.createMessageTextShows(recommendedShows);
 
-            for (String username : usersToNotify) {
-                emailService.sendEmail(username, emailSubject, messageText);
+            for (String email : usersToNotify) {
+                emailService.sendEmail(email, emailSubject, messageText);
             }
         }
     }
 
     private Set<Show> findNewRecommendations(List<ShowRating> ratings) {
         List<Show> premieringShows = showService.getPremieringShows();
-        premieringShows.forEach(show -> showService.setReleaseDateForExistingShow(show.getReleaseDate(),show.getTraktId()));
-
+        handleSpecialCases(premieringShows);
+        
         List<Show> existingShowsToCheck = showRepository.findAllByShouldGetRatingChecked(true);
 
         Set<Show> recommendedShows = showService.findRecommendedShows(premieringShows, ratings);
         recommendedShows.addAll(showService.findRecommendedShows(existingShowsToCheck, ratings));
         return recommendedShows;
+    }
+
+    //Handles shows that are already saved in the database, but are yet to be released
+    private void handleSpecialCases(List<Show> premieringShows) {
+        for (Show show : premieringShows) {
+            if(showRepository.existsById(show.getTraktId())){
+                showRepository.setReleaseDate(show.getReleaseDate(), show.getTraktId());
+                showRepository.setShouldGetRatingChecked(true, show.getTraktId());
+            }
+        }
     }
 }

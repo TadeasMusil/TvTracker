@@ -92,11 +92,6 @@ public class ShowService {
         return shows;
     }
 
-    public void setReleaseDateForExistingShow(LocalDate date, String showId){
-        if(showRepository.existsById(showId)){
-            showRepository.setReleaseDate(date, showId);
-        }
-    }
 /**
  * Checks rating of an existing show and returns true if it passes all requirements.
  * Show's rating won't be checked again if show is too old or meets only votes requirements.

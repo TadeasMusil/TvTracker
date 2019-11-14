@@ -7,7 +7,7 @@ import tadeas_musil.tv_series_tracker.model.User;
 @Service
 public interface UserService {
 	
-	User saveUser(User user);
+	User createUser(User user);
 
 	User getByUsername(String username);
 
@@ -15,8 +15,12 @@ public interface UserService {
 
 	void followShow(String username, String traktId);
 
+	void unfollowShow(String username, String traktId);
+/**
+ * Returns user and his followed shows
+ */
 	User getByUsernameWithShows(String username);
 
-	void unfollowShow(String username, String traktId);
+	
 
 }
