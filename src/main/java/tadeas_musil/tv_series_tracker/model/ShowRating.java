@@ -51,7 +51,7 @@ public class ShowRating implements Comparable<ShowRating> {
         return true;
     }
 
-    // every imdb id starts with 'tt'
+    // Every imdb id starts with 'tt'
     @Override
     public int compareTo(ShowRating movie) {
         return Integer.parseInt(this.imdbId.substring(2)) - Integer.parseInt(movie.getImdbId().substring(2));

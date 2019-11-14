@@ -2,7 +2,6 @@ package tadeas_musil.tv_series_tracker.scheduled;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -30,7 +29,6 @@ import tadeas_musil.tv_series_tracker.model.ShowRating;
 import tadeas_musil.tv_series_tracker.model.User;
 import tadeas_musil.tv_series_tracker.repository.ShowRepository;
 import tadeas_musil.tv_series_tracker.repository.UserRepository;
-import tadeas_musil.tv_series_tracker.service.FileService;
 import tadeas_musil.tv_series_tracker.service.ShowRatingService;
 import tadeas_musil.tv_series_tracker.service.ShowService;
 
@@ -48,9 +46,6 @@ public class RecommendedShowsNotificationTest {
     private ShowService showService;
 
     @MockBean
-    private FileService fileService;
-
-    @MockBean
     private UserRepository userRepository;
 
     @MockBean
@@ -66,7 +61,7 @@ public class RecommendedShowsNotificationTest {
     public void setUp() {
         greenMail.setUser("test@localhost", "username", "password");
 
-        when(fileService.parseTsv(anyString())).thenReturn(List.of(new ShowRating("id1", 10.0, 2000)));
+        when(showRatingService.getRatings()).thenReturn(List.of(new ShowRating("id1", 10.0, 2000)));
 
         
         when(showService.getPremieringShows()).thenReturn(Arrays.asList(getPlanetEarth()));
@@ -87,7 +82,7 @@ public class RecommendedShowsNotificationTest {
 
     @Test
     public void notifyUsers_shouldSendCorrectEmail_givenOneNewRecommendedShow() throws Exception {
-        when(showRatingService.checkRatings(anyList(), anyList())).thenReturn(Sets.newHashSet(getPlanetEarth()));
+        when(showService.findRecommendedShows(anyList(), anyList())).thenReturn(Sets.newHashSet(getPlanetEarth()));
 
         recommendedShowsNotification.notifyUsers();
         MimeMessage[] messages = greenMail.getReceivedMessages();
@@ -99,7 +94,7 @@ public class RecommendedShowsNotificationTest {
 
     @Test
     public void notifyUsers_shouldSendZeroEmails_givenNoNewRecommendedShow() throws Exception {
-        when(showRatingService.checkRatings(anyList(), anyList())).thenReturn(new HashSet<Show>());
+        when(showService.findRecommendedShows(anyList(), anyList())).thenReturn(new HashSet<Show>());
 
         recommendedShowsNotification.notifyUsers();
         MimeMessage[] messages = greenMail.getReceivedMessages();

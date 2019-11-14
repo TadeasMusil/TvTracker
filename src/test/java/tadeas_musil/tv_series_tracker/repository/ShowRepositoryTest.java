@@ -34,6 +34,21 @@ public class ShowRepositoryTest {
     }
 
     @Test
+    public void findByIsRecommendedAndImageUrl_shouldFindOneShow(){
+        Show show1 = new Show();
+        show1.setTraktId("1");
+        show1.setImageUrl("image");
+        Show show2 = new Show();
+        show2.setRecommended(true);
+        show2.setTraktId("2");
+        showRepository.saveAll(List.of(show1, show2));
+        
+        List<Show> shows = showRepository.findByIsRecommendedAndImageUrl(true, null);
+        
+        assertThat(shows).hasSize(1);       
+    }
+
+    @Test
     public void setReleaseDate_shouldUpdateReleaseDate(){
         Show show = new Show();
         show.setTraktId("id");
@@ -69,6 +84,17 @@ public class ShowRepositoryTest {
         Show updatedShow = showRepository.findById("id").get();
         
         assertThat(updatedShow).hasFieldOrPropertyWithValue("isRecommended", true);
-                    
-}
+    }
+
+    @Test
+    public void setImageUrl_shouldUpdateImageUrl(){
+        Show show = new Show();
+        show.setTraktId("id");
+        showRepository.save(show);
+
+        showRepository.setImageUrl("image-url", "id");
+        Show updatedShow = showRepository.findById("id").get();
+        
+        assertThat(updatedShow).hasFieldOrPropertyWithValue("imageUrl", "image-url");
+    }
 }

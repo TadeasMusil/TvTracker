@@ -16,7 +16,7 @@
         <th:block th:if="${i.index % 3 == 0}">
             <div class="row">
         </th:block>
-        <div class="show-div col-sm-4">
+        <div class="show-div col-md-4">
             <figure class="card card-product show-card">
                 <!--Picture-->
                 <div class="img-wrap"><img th:if="${show.imageUrl == ''}" src="/images/image-not-available.png">
@@ -29,7 +29,7 @@
                     <form th:action="@{/user/followShow}" th:object="${showToTrack}" method="post">
 
                         <a th:unless="${show.imdbId == null}"
-                            th:href="@{'https://www.imdb.com/title/' + ${show.imdbId}}" class="float-left">Imdb page</a>
+                            th:href="@{'https://www.imdb.com/title/' + ${show.imdbId}}" class="float-left">Imdb</a>
 
 
                         <input type="hidden" name="traktId" th:value="${show.traktId}">

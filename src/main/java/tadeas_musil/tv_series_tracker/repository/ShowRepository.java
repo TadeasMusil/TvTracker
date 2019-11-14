@@ -19,6 +19,8 @@ public interface ShowRepository extends JpaRepository<Show, String> {
 	List<Show> findAllByShouldGetRatingChecked(boolean shouldGetRatingChecked);
 
 	Page<Show> findByIsRecommendedOrderByReleaseDateDesc(boolean isRecommended, Pageable pageable);
+
+	List<Show> findByIsRecommendedAndImageUrl(boolean isRecommended, String imageUrl);
 	
 	@Transactional
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
@@ -34,4 +36,9 @@ public interface ShowRepository extends JpaRepository<Show, String> {
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query("UPDATE Show s SET s.isRecommended = ?1 WHERE s.traktId = ?2")
 	void setIsRecommended(boolean isRecommended, String traktId);
+
+	@Transactional
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("UPDATE Show s SET s.imageUrl = ?1 WHERE s.traktId = ?2")
+	void setImageUrl(String imageUrl, String traktId);
 }

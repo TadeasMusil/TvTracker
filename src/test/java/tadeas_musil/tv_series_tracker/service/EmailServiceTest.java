@@ -27,7 +27,7 @@ public class EmailServiceTest {
     cosmos.setTitle("Cosmos");
     cosmos.setYear(2007);
     Set<Show> shows = Sets.newLinkedHashSet(planetEarth,cosmos);
-
+    
     String message = emailService.createMessageTextShows(shows);
     
     assertThat(message).isEqualTo("Planet Earth (2015)\n\nCosmos (2007)\n\n");

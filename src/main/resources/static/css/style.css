@@ -208,4 +208,14 @@ margin-left: 4px;
         font-size: xx-large;
         color:#EB5160;
     }
+    .navbar-spacing{
+        width: 100%;
+        justify-content: space-around;
+    }
+    .oauth-icon{
+        color: #FFC312;
+    }
+    .oauth-icon:hover{
+        color: white;
+    }
   

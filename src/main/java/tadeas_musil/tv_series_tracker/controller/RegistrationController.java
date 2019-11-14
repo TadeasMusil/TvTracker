@@ -30,7 +30,7 @@ public class RegistrationController {
 		if (bindingResult.hasErrors()) {
 			return "registration-form";
 		}
-		userService.saveUser(user);
+		userService.createUser(user);
 		return "index";
 	}
 }
