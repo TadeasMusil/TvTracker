@@ -29,7 +29,7 @@
                     <form th:action="@{/user/followShow}" th:object="${showToTrack}" method="post">
 
                         <a th:unless="${show.imdbId == null}"
-                            th:href="@{'https://www.imdb.com/title/' + ${show.imdbId}}" class="float-left">Imdb page</a>
+                            th:href="@{'https://www.imdb.com/title/' + ${show.imdbId}}" class="float-left">Imdb</a>
 
 
                         <input type="hidden" name="traktId" th:value="${show.traktId}">
